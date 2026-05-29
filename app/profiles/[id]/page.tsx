@@ -20,6 +20,7 @@ import { CadenceChart } from "./cadence-chart";
 import { TopEngagedAuthors } from "./top-engaged";
 import { PostsFilter } from "./posts-filter";
 import { PostsPanel } from "./posts-panel";
+import { ProfileTags } from "./profile-tags";
 import { AutoSync } from "./auto-sync";
 import { getServerI18n } from "@/lib/i18n/server";
 import type { Dict } from "@/lib/i18n/dictionaries";
@@ -167,6 +168,23 @@ export default async function ProfilePage({
       .single();
     company = c;
   }
+
+  // Tags: this profile's tags + all of the user's tags (for autocomplete)
+  const [{ data: profileTagRows }, { data: allTagRows }] = await Promise.all([
+    supabase
+      .from("linkedin_profile_tags")
+      .select("tag:linkedin_tags(id, name)")
+      .eq("profile_id", profile.id),
+    supabase.from("linkedin_tags").select("id, name").order("name"),
+  ]);
+  type TagRow = { id: string; name: string };
+  const profileTags: TagRow[] = (profileTagRows ?? [])
+    .map((r) => {
+      const tg = (r as { tag: TagRow | TagRow[] | null }).tag;
+      return Array.isArray(tg) ? tg[0] : tg;
+    })
+    .filter((x): x is TagRow => Boolean(x));
+  const allTags: TagRow[] = (allTagRows as TagRow[] | null) ?? [];
 
   const profileType: "person" | "company" =
     profile.profile_type === "company" ? "company" : "person";
@@ -346,6 +364,13 @@ export default async function ProfilePage({
               >
                 {profile.profile_url}
               </a>
+              <ProfileTags
+                profileId={profile.id}
+                tags={profileTags}
+                allTags={allTags}
+                addLabel={t.addTag}
+                placeholder={t.tagPlaceholder}
+              />
             </div>
             <div className="flex gap-2 shrink-0">
               <SyncButton

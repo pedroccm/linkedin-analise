@@ -34,6 +34,9 @@ export async function fetchTimeline(
   const supabase = await createClient();
   const limit = options.limit ?? 200;
 
+  // An explicitly empty actor set means "no matching profiles" → no rows.
+  if (options.actorIds && options.actorIds.length === 0) return [];
+
   let reactionsQ = supabase
     .from("linkedin_profile_reactions")
     .select(

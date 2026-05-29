@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { fetchTimeline } from "@/lib/timeline";
 import { TimelineItem } from "./timeline-item";
 import { CompanyFilter } from "../feed/company-filter";
+import { TagFilter } from "../feed/tag-filter";
 import { FilterBar } from "../feed/filter-bar";
 import { getServerI18n } from "@/lib/i18n/server";
 
@@ -24,7 +25,7 @@ function rangeStartISO(range: string): string | null {
 export default async function TimelinePage({
   searchParams,
 }: {
-  searchParams: Promise<{ range?: string; q?: string; company?: string }>;
+  searchParams: Promise<{ range?: string; q?: string; company?: string; tag?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -36,23 +37,39 @@ export default async function TimelinePage({
   const range = typeof sp.range === "string" ? sp.range : "";
   const query = typeof sp.q === "string" ? sp.q : "";
   const companyId = typeof sp.company === "string" ? sp.company : "";
+  const tagId = typeof sp.tag === "string" ? sp.tag : "";
   const t = (await getServerI18n()).dict.timeline;
 
-  const { data: companies } = await supabase
-    .from("linkedin_profiles")
-    .select("id, full_name, handle")
-    .eq("profile_type", "company")
-    .order("full_name");
+  const [{ data: companies }, { data: tags }] = await Promise.all([
+    supabase
+      .from("linkedin_profiles")
+      .select("id, full_name, handle")
+      .eq("profile_type", "company")
+      .order("full_name"),
+    supabase.from("linkedin_tags").select("id, name").order("name"),
+  ]);
 
-  // Restrict to people linked to a company if filtered
-  let actorIds: string[] | undefined;
+  // Restrict actors by company and/or tag (intersection when both set).
+  const filters: string[][] = [];
   if (companyId) {
     const { data: linked } = await supabase
       .from("linkedin_profiles")
       .select("id")
       .eq("company_profile_id", companyId);
-    actorIds = linked?.map((p) => p.id) ?? [];
-    // Companies don't react/comment, so we don't include the company itself
+    filters.push(linked?.map((p) => p.id) ?? []);
+  }
+  if (tagId) {
+    const { data: tagged } = await supabase
+      .from("linkedin_profile_tags")
+      .select("profile_id")
+      .eq("tag_id", tagId);
+    filters.push((tagged ?? []).map((r) => r.profile_id));
+  }
+  let actorIds: string[] | undefined;
+  if (filters.length === 1) actorIds = filters[0];
+  else if (filters.length > 1) {
+    const sets = filters.map((f) => new Set(f));
+    actorIds = [...sets[0]].filter((id) => sets.every((s) => s.has(id)));
   }
 
   const rows = await fetchTimeline({
@@ -68,12 +85,13 @@ export default async function TimelinePage({
         <p className="text-[var(--color-text-muted)] text-sm">{t.subtitle}</p>
       </section>
 
-      <section className="flex flex-wrap items-center justify-between gap-3">
+      <section className="flex flex-wrap items-center gap-3">
         <CompanyFilter
           companies={companies ?? []}
           currentCompanyId={companyId}
           basePath="/timeline"
         />
+        <TagFilter tags={tags ?? []} currentTagId={tagId} basePath="/timeline" />
       </section>
 
       <FilterBar basePath="/timeline" currentRange={range} currentQuery={query} />

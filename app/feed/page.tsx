@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { FeedPostItem } from "../profiles/[id]/feed-post-item";
 import { CompanyFilter } from "./company-filter";
+import { TagFilter } from "./tag-filter";
 import { FilterBar } from "./filter-bar";
 import { SortPills, type GlobalSortKey } from "./sort-pills";
 import { getServerI18n } from "@/lib/i18n/server";
@@ -58,7 +59,7 @@ type RawPost = {
 export default async function FeedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string; range?: string; q?: string; company?: string }>;
+  searchParams: Promise<{ sort?: string; range?: string; q?: string; company?: string; tag?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -71,21 +72,39 @@ export default async function FeedPage({
   const range = typeof sp.range === "string" ? sp.range : "";
   const query = typeof sp.q === "string" ? sp.q : "";
   const companyId = typeof sp.company === "string" ? sp.company : "";
+  const tagId = typeof sp.tag === "string" ? sp.tag : "";
   const t = (await getServerI18n()).dict.feed;
 
-  const { data: companies } = await supabase
-    .from("linkedin_profiles")
-    .select("id, full_name, handle")
-    .eq("profile_type", "company")
-    .order("full_name");
+  const [{ data: companies }, { data: tags }] = await Promise.all([
+    supabase
+      .from("linkedin_profiles")
+      .select("id, full_name, handle")
+      .eq("profile_type", "company")
+      .order("full_name"),
+    supabase.from("linkedin_tags").select("id, name").order("name"),
+  ]);
 
-  let authorFilter: string[] | null = null;
+  // Build the author filter from company and/or tag (intersection when both set).
+  const filters: string[][] = [];
   if (companyId) {
     const { data: linked } = await supabase
       .from("linkedin_profiles")
       .select("id")
       .eq("company_profile_id", companyId);
-    authorFilter = [companyId, ...(linked?.map((p) => p.id) ?? [])];
+    filters.push([companyId, ...(linked?.map((p) => p.id) ?? [])]);
+  }
+  if (tagId) {
+    const { data: tagged } = await supabase
+      .from("linkedin_profile_tags")
+      .select("profile_id")
+      .eq("tag_id", tagId);
+    filters.push((tagged ?? []).map((r) => r.profile_id));
+  }
+  let authorFilter: string[] | null = null;
+  if (filters.length === 1) authorFilter = filters[0];
+  else if (filters.length > 1) {
+    const sets = filters.map((f) => new Set(f));
+    authorFilter = [...sets[0]].filter((id) => sets.every((s) => s.has(id)));
   }
 
   const { column, ascending } = SORT_CONFIG[sort];
@@ -120,11 +139,14 @@ export default async function FeedPage({
       </section>
 
       <section className="flex flex-wrap items-center justify-between gap-3">
-        <CompanyFilter
-          companies={companies ?? []}
-          currentCompanyId={companyId}
-          basePath="/feed"
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <CompanyFilter
+            companies={companies ?? []}
+            currentCompanyId={companyId}
+            basePath="/feed"
+          />
+          <TagFilter tags={tags ?? []} currentTagId={tagId} basePath="/feed" />
+        </div>
         <SortPills basePath="/feed" currentSort={sort} />
       </section>
 
