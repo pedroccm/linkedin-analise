@@ -38,8 +38,7 @@ export async function StatsCard({ profileId, t }: { profileId: string; t: Dict["
   const minDate = dates.length ? new Date(Math.min(...dates)) : null;
   const maxDate = dates.length ? new Date(Math.max(...dates)) : null;
 
-  const repostCount = posts.filter((p) => p.post_type && p.post_type !== "post").length;
-  const repostShare = (repostCount / posts.length) * 100;
+  const totalReposts = reposts.reduce((a, b) => a + b, 0);
 
   const s = t.stats;
   const stats = [
@@ -50,7 +49,7 @@ export async function StatsCard({ profileId, t }: { profileId: string; t: Dict["
     { label: s.avgComments, value: fmt(comments.reduce((a, b) => a + b, 0) / comments.length) },
     { label: s.avgReposts, value: fmt(reposts.reduce((a, b) => a + b, 0) / reposts.length) },
     { label: s.bestPost, value: fmt(Math.max(...likes)) },
-    { label: s.reshareShare, value: `${repostShare.toFixed(0)}%` },
+    { label: s.totalReposts, value: fmt(totalReposts) },
   ];
 
   return (

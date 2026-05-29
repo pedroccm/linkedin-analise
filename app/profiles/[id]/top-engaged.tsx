@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Dict } from "@/lib/i18n/dictionaries";
+import { addProfile } from "../../actions";
+import { SubmitButton } from "../../submit-button";
 
 type Agg = {
   name: string;
@@ -8,24 +11,51 @@ type Agg = {
   comments: number;
 };
 
+// Canonicalize a LinkedIn URL to https://www.linkedin.com/in/<handle> (lowercased),
+// matching what addProfile stores, so we can tell which authors are already tracked.
+function canonUrl(u: string | null | undefined): string | null {
+  if (!u) return null;
+  try {
+    const url = new URL(u);
+    if (!url.hostname.includes("linkedin.com")) return null;
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (parts.length < 2) return null;
+    return `https://www.linkedin.com/${parts.slice(0, 2).join("/")}`.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
 export async function TopEngagedAuthors({ profileId, t }: { profileId: string; t: Dict["profile"] }) {
   const supabase = await createClient();
 
-  const [{ data: profile }, { data: reactions }, { data: comments }] = await Promise.all([
-    supabase
-      .from("linkedin_profiles")
-      .select("profile_url, full_name, handle")
-      .eq("id", profileId)
-      .single(),
-    supabase
-      .from("linkedin_profile_reactions")
-      .select("post_author_name, post_author_url")
-      .eq("profile_id", profileId),
-    supabase
-      .from("linkedin_profile_comments")
-      .select("parent_post_author_name, parent_post_author_url")
-      .eq("profile_id", profileId),
-  ]);
+  const [{ data: profile }, { data: reactions }, { data: comments }, { data: tracked }] =
+    await Promise.all([
+      supabase
+        .from("linkedin_profiles")
+        .select("profile_url, full_name, handle")
+        .eq("id", profileId)
+        .single(),
+      supabase
+        .from("linkedin_profile_reactions")
+        .select("post_author_name, post_author_url")
+        .eq("profile_id", profileId),
+      supabase
+        .from("linkedin_profile_comments")
+        .select("parent_post_author_name, parent_post_author_url")
+        .eq("profile_id", profileId),
+      supabase
+        .from("linkedin_profiles")
+        .select("id, profile_url")
+        .eq("profile_type", "person"),
+    ]);
+
+  // Map canonical URL -> tracked profile id (so we can link / mark as tracked)
+  const trackedByUrl = new Map<string, string>();
+  for (const p of tracked ?? []) {
+    const cu = canonUrl(p.profile_url);
+    if (cu) trackedByUrl.set(cu, p.id);
+  }
 
   if ((!reactions || reactions.length === 0) && (!comments || comments.length === 0)) {
     return null;
@@ -83,6 +113,8 @@ export async function TopEngagedAuthors({ profileId, t }: { profileId: string; t
       <ul className="grid gap-1">
         {top.map((a, i) => {
           const total = a.reactions + a.comments;
+          const cu = canonUrl(a.url);
+          const trackedId = cu ? trackedByUrl.get(cu) : undefined;
           return (
             <li
               key={a.name}
@@ -105,10 +137,28 @@ export async function TopEngagedAuthors({ profileId, t }: { profileId: string; t
                   <span className="text-sm">{a.name}</span>
                 )}
               </div>
-              <div className="flex gap-3 text-xs text-[var(--color-text-muted)] shrink-0">
+              <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)] shrink-0">
                 {a.reactions > 0 && <span>❤ {a.reactions}</span>}
                 {a.comments > 0 && <span>💬 {a.comments}</span>}
                 <span className="text-white font-medium w-8 text-right">{total}</span>
+                {a.url &&
+                  (trackedId ? (
+                    <Link
+                      href={`/profiles/${trackedId}`}
+                      className="text-[10px] px-2 py-1 rounded border border-[var(--color-success)] text-[var(--color-success)] no-underline hover:bg-[#0f3a1f] transition-colors whitespace-nowrap"
+                    >
+                      {t.tracked}
+                    </Link>
+                  ) : (
+                    <form action={addProfile}>
+                      <input type="hidden" name="profile_url" value={a.url} />
+                      <SubmitButton
+                        idle={t.track}
+                        pending={t.adding}
+                        className="text-[10px] px-2 py-1 rounded border border-[var(--color-border)] hover:border-[var(--color-accent-2)] hover:text-white text-[var(--color-text-muted)] transition-colors whitespace-nowrap"
+                      />
+                    </form>
+                  ))}
               </div>
             </li>
           );

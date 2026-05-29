@@ -240,7 +240,7 @@ export const dictionaries = {
         avgComments: "Média comments/post",
         avgReposts: "Média reposts/post",
         bestPost: "Melhor post (likes)",
-        reshareShare: "% de reposts",
+        totalReposts: "Total de reposts",
       },
       cadence: {
         title: "Cadência (posts por semana)",
@@ -503,7 +503,7 @@ export const dictionaries = {
         avgComments: "Avg comments/post",
         avgReposts: "Avg reposts/post",
         bestPost: "Best post (likes)",
-        reshareShare: "Reshares share",
+        totalReposts: "Total reposts",
       },
       cadence: {
         title: "Cadence (posts per week)",
