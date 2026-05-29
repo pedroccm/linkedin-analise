@@ -140,11 +140,19 @@ export default async function ProfilePage({
   const t = dict.profile;
   const common = dict.common;
 
-  const { data: profile } = await supabase
-    .from("linkedin_profiles")
-    .select("*")
-    .eq("id", id)
-    .single();
+  // Accept either a UUID or a LinkedIn handle in the URL ( /profiles/antonioaduarte ).
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  const { data: profile } = await (isUuid
+    ? supabase.from("linkedin_profiles").select("*").eq("id", id)
+    : supabase
+        .from("linkedin_profiles")
+        .select("*")
+        .eq("handle", decodeURIComponent(id))
+        .order("created_at", { ascending: true })
+  )
+    .limit(1)
+    .maybeSingle();
 
   if (!profile) notFound();
 
@@ -269,7 +277,7 @@ export default async function ProfilePage({
                 <div className="mt-2 text-sm">
                   <span className="text-[var(--color-text-muted)]">{t.worksAt} </span>
                   <Link
-                    href={`/profiles/${company.id}`}
+                    href={`/profiles/${company.handle || company.id}`}
                     className="text-[var(--color-accent-2)] hover:underline"
                   >
                     {company.full_name || company.handle}
@@ -761,7 +769,7 @@ async function EmployeesSection({
                   <div className="w-9 h-9 rounded-full bg-[var(--color-bg-2)] shrink-0" />
                 )}
                 <Link
-                  href={`/profiles/${p.id}`}
+                  href={`/profiles/${p.handle || p.id}`}
                   className="flex-1 min-w-0 no-underline text-white"
                 >
                   <div className="text-sm font-medium truncate">

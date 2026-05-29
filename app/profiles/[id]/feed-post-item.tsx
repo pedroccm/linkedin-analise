@@ -60,7 +60,7 @@ export function FeedPostItem({ post }: { post: FeedPost }) {
           )}
           <div className="min-w-0 flex-1">
             <Link
-              href={`/profiles/${post.author.id}`}
+              href={`/profiles/${post.author.handle || post.author.id}`}
               className="text-sm font-medium text-white no-underline hover:underline truncate block"
             >
               {post.author.full_name || post.author.handle || p.unknown}

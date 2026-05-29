@@ -98,7 +98,7 @@ export default async function Home() {
               key={p.id}
               className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-4 hover:border-[var(--color-accent-2)] transition-colors"
             >
-              <Link href={`/profiles/${p.id}`} className="no-underline text-white">
+              <Link href={`/profiles/${p.handle || p.id}`} className="no-underline text-white">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
                     <span

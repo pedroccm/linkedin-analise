@@ -73,7 +73,7 @@ export function TimelineItem({ row }: { row: TimelineRow }) {
           <div className="text-sm flex items-center gap-2 flex-wrap">
             {row.actor && (
               <Link
-                href={`/profiles/${row.actor.id}`}
+                href={`/profiles/${row.actor.handle || row.actor.id}`}
                 className="font-medium text-white no-underline hover:underline"
               >
                 {row.actor.name || row.actor.handle || "Unknown"}
