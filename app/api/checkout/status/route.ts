@@ -9,7 +9,7 @@ const DAYS_30_MS = 30 * 24 * 60 * 60 * 1000;
 async function fulfillPayment(paymentId: string) {
   const admin = createServiceClient();
   const { data: payment } = await admin
-    .from("payments")
+    .from("linkedin_payments")
     .select("id, user_id, plan_tier, status")
     .eq("id", paymentId)
     .single();
@@ -17,13 +17,13 @@ async function fulfillPayment(paymentId: string) {
   if (!payment || payment.status !== "pending") return;
 
   await admin
-    .from("payments")
+    .from("linkedin_payments")
     .update({ status: "paid", paid_at: new Date().toISOString() })
     .eq("id", payment.id);
 
   // Extend subscription: max(now, current_subscription_until) + 30 days
   const { data: meta } = await admin
-    .from("users_meta")
+    .from("linkedin_users_meta")
     .select("subscription_until")
     .eq("user_id", payment.user_id)
     .single();
@@ -35,7 +35,7 @@ async function fulfillPayment(paymentId: string) {
   const newUntil = new Date(base.getTime() + DAYS_30_MS);
 
   await admin
-    .from("users_meta")
+    .from("linkedin_users_meta")
     .update({
       plan_tier: payment.plan_tier,
       subscription_until: newUntil.toISOString(),
@@ -61,7 +61,7 @@ export async function GET(request: Request) {
   }
 
   const { data: payment } = await supabase
-    .from("payments")
+    .from("linkedin_payments")
     .select("id, abacate_pix_id, status")
     .eq("id", paymentId)
     .single();
@@ -106,7 +106,7 @@ export async function GET(request: Request) {
   ) {
     const admin = createServiceClient();
     await admin
-      .from("payments")
+      .from("linkedin_payments")
       .update({ status: statusResp.data.status.toLowerCase() })
       .eq("id", payment.id);
   }

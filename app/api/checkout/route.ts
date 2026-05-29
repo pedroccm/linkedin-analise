@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
   const admin = createServiceClient();
   const { data: payment, error: insertError } = await admin
-    .from("payments")
+    .from("linkedin_payments")
     .insert({
       user_id: user.id,
       plan_tier: plan,

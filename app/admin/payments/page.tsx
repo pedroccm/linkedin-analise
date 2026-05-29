@@ -17,7 +17,7 @@ export default async function PaymentsPage({
   const admin = createServiceClient();
 
   let query = admin
-    .from("payments")
+    .from("linkedin_payments")
     .select("id, user_id, plan_tier, amount_cents, status, paid_at, pix_expires_at, created_at")
     .order("created_at", { ascending: false })
     .limit(500);

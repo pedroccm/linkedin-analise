@@ -19,7 +19,7 @@ export default async function UserDetailPage({
     await Promise.all([
       admin.auth.admin.getUserById(id),
       admin
-        .from("users_meta")
+        .from("linkedin_users_meta")
         .select("plan_tier, subscription_until, full_name, created_at")
         .eq("user_id", id)
         .single(),
@@ -31,14 +31,14 @@ export default async function UserDetailPage({
         .eq("user_id", id)
         .order("created_at", { ascending: false }),
       admin
-        .from("payments")
+        .from("linkedin_payments")
         .select(
           "id, plan_tier, amount_cents, status, paid_at, pix_expires_at, created_at"
         )
         .eq("user_id", id)
         .order("created_at", { ascending: false }),
       admin
-        .from("sync_log")
+        .from("linkedin_sync_log")
         .select("sync_type, items_returned, cost_micro_usd, created_at")
         .eq("user_id", id)
         .order("created_at", { ascending: false })

@@ -22,7 +22,7 @@ export async function logSync(params: {
   if (params.syncType === "details_posts") cost += DETAILS_FIXED_COST_MICRO_USD;
 
   const admin = createServiceClient();
-  await admin.from("sync_log").insert({
+  await admin.from("linkedin_sync_log").insert({
     user_id: params.userId,
     profile_id: params.profileId,
     sync_type: params.syncType,

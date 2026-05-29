@@ -26,7 +26,7 @@ export async function extendSubscription(formData: FormData) {
 
   const admin = createServiceClient();
   const { data: meta } = await admin
-    .from("users_meta")
+    .from("linkedin_users_meta")
     .select("subscription_until, plan_tier")
     .eq("user_id", userId)
     .single();
@@ -41,7 +41,7 @@ export async function extendSubscription(formData: FormData) {
   const tier = meta?.plan_tier && meta.plan_tier !== "free" ? meta.plan_tier : "starter";
 
   await admin
-    .from("users_meta")
+    .from("linkedin_users_meta")
     .update({
       plan_tier: tier,
       subscription_until: newUntil.toISOString(),
@@ -64,7 +64,7 @@ export async function setPlanTier(formData: FormData) {
 
   const admin = createServiceClient();
   await admin
-    .from("users_meta")
+    .from("linkedin_users_meta")
     .update({
       plan_tier: tier,
       updated_at: new Date().toISOString(),

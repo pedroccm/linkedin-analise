@@ -34,16 +34,16 @@ export default async function AdminDashboardPage() {
   // Run everything in parallel
   const [authUsersResp, metas, payments30, syncs30, paymentsAll] = await Promise.all([
     admin.auth.admin.listUsers({ perPage: 1000 }),
-    admin.from("users_meta").select("user_id, plan_tier, subscription_until"),
+    admin.from("linkedin_users_meta").select("user_id, plan_tier, subscription_until"),
     admin
-      .from("payments")
+      .from("linkedin_payments")
       .select("amount_cents, status, paid_at, plan_tier")
       .gte("created_at", since30d),
     admin
-      .from("sync_log")
+      .from("linkedin_sync_log")
       .select("cost_micro_usd")
       .gte("created_at", since30d),
-    admin.from("payments").select("amount_cents, status, paid_at"),
+    admin.from("linkedin_payments").select("amount_cents, status, paid_at"),
   ]);
 
   const authUsers = authUsersResp.data?.users ?? [];

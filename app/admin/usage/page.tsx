@@ -32,7 +32,7 @@ export default async function AdminUsagePage() {
 
   // 2) users_meta
   const { data: metas } = await admin
-    .from("users_meta")
+    .from("linkedin_users_meta")
     .select("user_id, plan_tier, subscription_until");
 
   // 3) Profile counts
@@ -43,12 +43,12 @@ export default async function AdminUsagePage() {
   // 4) Sync log last 30 days
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const { data: syncs30d } = await admin
-    .from("sync_log")
+    .from("linkedin_sync_log")
     .select("user_id, cost_micro_usd")
     .gte("created_at", since);
 
   // 5) Total syncs ever
-  const { data: syncsAll } = await admin.from("sync_log").select("user_id");
+  const { data: syncsAll } = await admin.from("linkedin_sync_log").select("user_id");
 
   // Aggregate
   const metaMap = new Map(metas?.map((m) => [m.user_id, m]) ?? []);

@@ -20,7 +20,7 @@ export default async function UsersListPage() {
 
   const [authUsersResp, metas, profileCounts] = await Promise.all([
     admin.auth.admin.listUsers({ perPage: 1000 }),
-    admin.from("users_meta").select("user_id, plan_tier, subscription_until"),
+    admin.from("linkedin_users_meta").select("user_id, plan_tier, subscription_until"),
     admin.from("linkedin_profiles").select("user_id"),
   ]);
 

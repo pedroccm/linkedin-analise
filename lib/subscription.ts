@@ -19,7 +19,7 @@ export async function getSubscriptionStatus(
 
   const [{ data: meta }, { count }] = await Promise.all([
     supabase
-      .from("users_meta")
+      .from("linkedin_users_meta")
       .select("plan_tier, subscription_until")
       .eq("user_id", userId)
       .single(),

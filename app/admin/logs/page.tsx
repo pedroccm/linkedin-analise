@@ -55,7 +55,7 @@ export default async function LogsPage({
 
   // Query the log
   let q = admin
-    .from("sync_log")
+    .from("linkedin_sync_log")
     .select("id, user_id, profile_id, sync_type, items_returned, cost_micro_usd, created_at")
     .order("created_at", { ascending: false })
     .limit(500);
@@ -68,7 +68,7 @@ export default async function LogsPage({
 
   // Aggregations on the same filter (range + type + user) — separate sum query for stable totals
   let aggQ = admin
-    .from("sync_log")
+    .from("linkedin_sync_log")
     .select("sync_type, items_returned, cost_micro_usd");
   if (since) aggQ = aggQ.gte("created_at", since);
   if (type !== "all") aggQ = aggQ.eq("sync_type", type);
