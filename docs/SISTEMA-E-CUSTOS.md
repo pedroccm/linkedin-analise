@@ -149,7 +149,31 @@ Cobrança: PIX via AbacatePay, ativa o plano por 30 dias. Renovação manual
 
 ---
 
-## 7. Onde olhar no admin
+## 7. Acesso e contas
+
+### Admin
+- Admin é definido por email na allowlist `ADMIN_EMAILS` (env). Hoje: `pedroccm@gmail.com`.
+- Quem loga com um email da allowlist vê o link **Admin** no header e acessa `/admin/*`.
+- Login compartilhado (SSO): a mesma conta serve LIA e os outros produtos no mesmo Supabase.
+
+> 🔒 Senhas não ficam neste repositório (ele é público). As credenciais de
+> teste/admin são compartilhadas fora do repo (chat/gerenciador de senhas).
+
+### Contas de teste (ambiente de produção)
+Cinco contas Pro criadas para teste, com assinatura válida por ~1 ano:
+
+| Email | Plano | Limite de perfis |
+| --- | --- | --- |
+| `prouser1@example.com` | Pro | 20 |
+| `prouser2@example.com` | Pro | 20 |
+| `prouser3@example.com` | Pro | 20 |
+| `prouser4@example.com` | Pro | 20 |
+| `prouser5@example.com` | Pro | 20 |
+
+Todas usam a mesma senha de teste (compartilhada fora do repo). Para remover
+depois, basta deletar os usuários em `/admin/users` ou via Supabase.
+
+## 8. Onde olhar no admin
 
 - `/admin` · KPIs (MRR, receita, custo Apify do mês, margem bruta)
 - `/admin/logs` · cada chamada Apify com custo, filtro por tipo/usuário/período
