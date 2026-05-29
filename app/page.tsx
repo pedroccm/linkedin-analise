@@ -5,6 +5,7 @@ import { SyncAllButton } from "./sync-all-button";
 import { Landing } from "./landing";
 import { getServerI18n } from "@/lib/i18n/server";
 import { SubmitButton } from "./submit-button";
+import { pickSuggestions } from "@/lib/suggested-profiles";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,11 @@ export default async function Home() {
     id: p.id,
     label: p.full_name || p.handle || p.profile_url,
   }));
+
+  const trackedUrls = new Set(
+    (profiles ?? []).map((p) => (p.profile_url ?? "").toLowerCase())
+  );
+  const suggestions = pickSuggestions(5, trackedUrls);
 
   return (
     <div className="space-y-8">
@@ -55,6 +61,26 @@ export default async function Home() {
           />
         </form>
         <p className="text-xs text-[var(--color-text-muted)] mt-2">{t.companyHint}</p>
+
+        {suggestions.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
+            <div className="text-xs uppercase tracking-wide text-[var(--color-text-muted)] mb-2">
+              {t.suggestions}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map((s) => (
+                <form key={s.url} action={addProfile}>
+                  <input type="hidden" name="profile_url" value={s.url} />
+                  <SubmitButton
+                    idle={`+ ${s.name}`}
+                    pending={t.adding}
+                    className="text-xs px-3 py-1.5 rounded-full border border-[var(--color-border)] hover:border-[var(--color-accent-2)] hover:text-white text-[var(--color-text-muted)] transition-colors"
+                  />
+                </form>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       <section>

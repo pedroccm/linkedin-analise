@@ -224,20 +224,9 @@ export default async function ProfilePage({
         </Link>
       </div>
 
-      {/* Profile card */}
+      {/* Profile card. Cover image intentionally omitted: LinkedIn media URLs
+          expire and block hotlinking, which left an empty gray bar. */}
       <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden">
-        {profile.cover_url && (
-          <div className="relative w-full h-32 bg-[var(--color-bg-2)]">
-            <Image
-              src={profile.cover_url}
-              alt=""
-              fill
-              sizes="100vw"
-              className="object-cover"
-              unoptimized
-            />
-          </div>
-        )}
         <div className="p-6">
           <div className="flex items-start gap-5 flex-wrap">
             {profile.avatar_url ? (

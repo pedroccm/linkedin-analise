@@ -88,6 +88,7 @@ export const dictionaries = {
       adding: "Adicionando…",
       companyHint:
         "Para empresas, também trazemos quem trabalha lá.",
+      suggestions: "Sugestões para começar",
       empty: "Você ainda não acompanha ninguém. Adicione o primeiro acima.",
       person: "Pessoa",
       company: "Empresa",
@@ -351,6 +352,7 @@ export const dictionaries = {
       add: "Add",
       adding: "Adding…",
       companyHint: "For companies, we also bring in who works there.",
+      suggestions: "Suggestions to get started",
       empty: "You're not tracking anyone yet. Add your first above.",
       person: "Person",
       company: "Company",
