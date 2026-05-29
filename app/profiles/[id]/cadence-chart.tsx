@@ -53,17 +53,24 @@ export async function CadenceChart({ profileId, t }: { profileId: string; t: Dic
           {t.cadence.last6m} · {window.reduce((a, b) => a + b.count, 0)} {t.cadence.postsShown}
         </span>
       </div>
-      <div className="flex items-end gap-1 h-24">
+      <div className="flex items-end gap-1 h-28">
         {window.map((b) => {
           const heightPct = (b.count / maxCount) * 100;
           const title = `${b.date.toLocaleDateString()}: ${b.count} posts · ❤💬↻ ${b.engagement}`;
           return (
             <div
               key={b.date.getTime()}
-              className="flex-1 bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] rounded-t transition-colors min-h-[2px] cursor-help"
-              style={{ height: `${heightPct}%` }}
+              className="flex-1 flex flex-col items-center justify-end gap-1 group cursor-help"
               title={title}
-            />
+            >
+              <span className="text-[9px] leading-none text-[var(--color-text-muted)] group-hover:text-white">
+                {b.count > 0 ? b.count : ""}
+              </span>
+              <div
+                className="w-full bg-[var(--color-accent)] group-hover:bg-[var(--color-accent-2)] rounded-t transition-colors min-h-[2px]"
+                style={{ height: `${heightPct}%` }}
+              />
+            </div>
           );
         })}
       </div>

@@ -19,6 +19,7 @@ import { StatsCard } from "./stats-card";
 import { CadenceChart } from "./cadence-chart";
 import { TopEngagedAuthors } from "./top-engaged";
 import { PostsFilter } from "./posts-filter";
+import { PostsPanel } from "./posts-panel";
 import { AutoSync } from "./auto-sync";
 import { getServerI18n } from "@/lib/i18n/server";
 import type { Dict } from "@/lib/i18n/dictionaries";
@@ -384,11 +385,7 @@ export default async function ProfilePage({
         <PostsSection
           profileId={profile.id}
           profileType={profileType}
-          sort={sort}
-          range={range}
-          query={query}
           t={t}
-          common={common}
         />
       )}
       {tab === "reactions" && !isCompany && (
@@ -425,35 +422,22 @@ export default async function ProfilePage({
 async function PostsSection({
   profileId,
   profileType,
-  sort,
-  range,
-  query,
   t,
-  common,
 }: {
   profileId: string;
   profileType: "person" | "company";
-  sort: SortKey;
-  range: string;
-  query: string;
   t: ProfileT;
-  common: CommonT;
 }) {
   const supabase = await createClient();
-  const { column, ascending } = SORT_CONFIG[sort];
 
-  let q = supabase
+  // Load all posts once; PostsPanel filters/sorts/searches client-side (instant).
+  const { data: posts } = await supabase
     .from("linkedin_posts")
     .select(
       "id, post_url, posted_at, text_content, post_type, reactions_count, comments_count, reposts_count"
     )
-    .eq("profile_id", profileId);
-
-  const since = rangeStartISO(range);
-  if (since) q = q.gte("posted_at", since);
-  if (query.trim()) q = q.ilike("text_content", `%${query.trim()}%`);
-
-  const { data: posts } = await q.order(column, { ascending, nullsFirst: false });
+    .eq("profile_id", profileId)
+    .order("posted_at", { ascending: false, nullsFirst: false });
 
   return (
     <div className="space-y-6">
@@ -461,38 +445,7 @@ async function PostsSection({
       <CadenceChart profileId={profileId} t={t} />
       {profileType === "person" && <TopEngagedAuthors profileId={profileId} t={t} />}
 
-      <section className="space-y-3">
-        <div className="flex flex-wrap gap-3 items-center justify-between">
-          <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
-            {t.allPosts}
-          </h3>
-          <SortTabs
-            profileId={profileId}
-            active={sort}
-            range={range}
-            query={query}
-            tab={profileType === "company" ? "posts" : ""}
-            common={common}
-          />
-        </div>
-        <PostsFilter
-          profileId={profileId}
-          currentSort={sort}
-          currentRange={range}
-          currentQuery={query}
-        />
-        <p className="text-xs text-[var(--color-text-muted)]">
-          {posts?.length ?? 0} {t.postsMatch}
-        </p>
-        {(!posts || posts.length === 0) && (
-          <p className="text-[var(--color-text-muted)] text-sm">{t.noPostsFilter}</p>
-        )}
-        <ul className="grid gap-3">
-          {posts?.map((p) => (
-            <PostItem key={p.id} post={p} />
-          ))}
-        </ul>
-      </section>
+      <PostsPanel posts={posts ?? []} />
     </div>
   );
 }
