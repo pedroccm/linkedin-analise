@@ -26,9 +26,13 @@ export default async function AdminUsagePage() {
 
   const admin = createServiceClient();
 
-  // 1) Auth users
-  const { data: authUsersResp } = await admin.auth.admin.listUsers({ perPage: 200 });
-  const authUsers = authUsersResp?.users ?? [];
+  // 1) Auth users, scoped to LIA members (shared auth holds other products' users too)
+  const [{ data: authUsersResp }, { data: members }] = await Promise.all([
+    admin.auth.admin.listUsers({ perPage: 1000 }),
+    admin.from("app_users").select("user_id").eq("app", "lia"),
+  ]);
+  const liaIds = new Set(members?.map((m) => m.user_id) ?? []);
+  const authUsers = (authUsersResp?.users ?? []).filter((u) => liaIds.has(u.id));
 
   // 2) users_meta
   const { data: metas } = await admin

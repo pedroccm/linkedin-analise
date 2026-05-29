@@ -22,7 +22,7 @@ export async function getSubscriptionStatus(
       .from("linkedin_users_meta")
       .select("plan_tier, subscription_until")
       .eq("user_id", userId)
-      .single(),
+      .maybeSingle(),
     supabase
       .from("linkedin_profiles")
       .select("id", { count: "exact", head: true })

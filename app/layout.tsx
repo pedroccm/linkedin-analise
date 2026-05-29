@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSubscriptionStatus } from "@/lib/subscription";
+import { ensureLiaUser } from "@/lib/ensure-lia-user";
 import { PLANS } from "@/lib/plans";
 import { isAdminEmail } from "@/lib/admin";
 import "./globals.css";
@@ -20,6 +21,8 @@ export default async function RootLayout({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (user) await ensureLiaUser(supabase, user.id);
 
   const status = user ? await getSubscriptionStatus(user.id) : null;
   const isAdmin = isAdminEmail(user?.email);

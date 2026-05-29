@@ -18,12 +18,15 @@ type Row = {
 export default async function UsersListPage() {
   const admin = createServiceClient();
 
-  const [authUsersResp, metas, profileCounts] = await Promise.all([
+  const [authUsersResp, members, metas, profileCounts] = await Promise.all([
     admin.auth.admin.listUsers({ perPage: 1000 }),
+    admin.from("app_users").select("user_id").eq("app", "lia"),
     admin.from("linkedin_users_meta").select("user_id, plan_tier, subscription_until"),
     admin.from("linkedin_profiles").select("user_id"),
   ]);
 
+  // Only LIA members — keeps users from other apps sharing this auth out of the list.
+  const liaIds = new Set(members.data?.map((m) => m.user_id) ?? []);
   const metaMap = new Map(metas.data?.map((m) => [m.user_id, m]) ?? []);
   const profileCountMap = new Map<string, number>();
   for (const p of profileCounts.data ?? []) {
@@ -31,6 +34,7 @@ export default async function UsersListPage() {
   }
 
   const rows: Row[] = (authUsersResp.data?.users ?? [])
+    .filter((u) => liaIds.has(u.id))
     .map((u) => {
       const m = metaMap.get(u.id);
       const tier = ((m?.plan_tier as PlanTier) ?? "free") as PlanTier;

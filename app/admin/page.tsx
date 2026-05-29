@@ -32,8 +32,9 @@ export default async function AdminDashboardPage() {
   const since30d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   // Run everything in parallel
-  const [authUsersResp, metas, payments30, syncs30, paymentsAll] = await Promise.all([
+  const [authUsersResp, members, metas, payments30, syncs30, paymentsAll] = await Promise.all([
     admin.auth.admin.listUsers({ perPage: 1000 }),
+    admin.from("app_users").select("user_id").eq("app", "lia"),
     admin.from("linkedin_users_meta").select("user_id, plan_tier, subscription_until"),
     admin
       .from("linkedin_payments")
@@ -46,7 +47,9 @@ export default async function AdminDashboardPage() {
     admin.from("linkedin_payments").select("amount_cents, status, paid_at"),
   ]);
 
-  const authUsers = authUsersResp.data?.users ?? [];
+  // Scope to LIA members only (shared auth holds users from other products too).
+  const liaIds = new Set(members.data?.map((m) => m.user_id) ?? []);
+  const authUsers = (authUsersResp.data?.users ?? []).filter((u) => liaIds.has(u.id));
   const totalUsers = authUsers.length;
   const newUsers30d = authUsers.filter(
     (u) => u.created_at && new Date(u.created_at) >= new Date(since30d)
