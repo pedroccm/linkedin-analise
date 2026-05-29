@@ -8,6 +8,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { getServerI18n } from "@/lib/i18n/server";
 import { I18nProvider } from "@/lib/i18n/client";
 import { LocaleSwitcher } from "./locale-switcher";
+import { UserMenu } from "./user-menu";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -77,34 +78,15 @@ export default async function RootLayout({
               <div className="flex items-center gap-4 text-sm">
                 <LocaleSwitcher />
                 {user && status ? (
-                  <>
-                    <Link
-                      href="/billing"
-                      className="text-[var(--color-text-muted)] hover:text-white no-underline"
-                      title="Manage plan"
-                    >
-                      <span className="text-white font-medium">
-                        {PLANS[status.activeTier].name}
-                      </span>
-                      <span className="ml-1">
-                        · {status.profilesUsed}/{status.profileLimit}
-                      </span>
-                      {status.daysLeft !== null && status.daysLeft > 0 && (
-                        <span className="ml-1">· {status.daysLeft}d</span>
-                      )}
-                    </Link>
-                    <span className="text-[var(--color-text-muted)] hidden sm:inline">
-                      {user.email}
-                    </span>
-                    <form action="/auth/signout" method="post">
-                      <button
-                        type="submit"
-                        className="text-[var(--color-text-muted)] hover:text-white text-sm"
-                      >
-                        {t.signOut}
-                      </button>
-                    </form>
-                  </>
+                  <UserMenu
+                    email={user.email ?? ""}
+                    planLabel={
+                      `${PLANS[status.activeTier].name} · ${status.profilesUsed}/${status.profileLimit}` +
+                      (status.daysLeft !== null && status.daysLeft > 0
+                        ? ` · ${status.daysLeft}d`
+                        : "")
+                    }
+                  />
                 ) : (
                   <Link
                     href="/auth/login"

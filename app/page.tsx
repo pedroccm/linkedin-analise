@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { addProfile } from "./actions";
 import { SyncAllButton } from "./sync-all-button";
@@ -6,6 +5,7 @@ import { Landing } from "./landing";
 import { getServerI18n } from "@/lib/i18n/server";
 import { SubmitButton } from "./submit-button";
 import { pickSuggestions } from "@/lib/suggested-profiles";
+import { ProfileList } from "./profile-list";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +62,7 @@ export default async function Home() {
         </form>
         <p className="text-xs text-[var(--color-text-muted)] mt-2">{t.companyHint}</p>
 
-        {suggestions.length > 0 && (
+        {suggestions.length > 0 && (profiles?.length ?? 0) < 2 && (
           <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
             <div className="text-xs uppercase tracking-wide text-[var(--color-text-muted)] mb-2">
               {t.suggestions}
@@ -85,58 +85,12 @@ export default async function Home() {
 
       <section>
         {error && (
-          <p className="text-[var(--color-danger)] text-sm">
-            {error.message}
-          </p>
+          <p className="text-[var(--color-danger)] text-sm">{error.message}</p>
         )}
         {!error && profiles && profiles.length === 0 && (
           <p className="text-[var(--color-text-muted)] text-sm">{t.empty}</p>
         )}
-        <ul className="grid gap-3">
-          {profiles?.map((p) => (
-            <li
-              key={p.id}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-4 hover:border-[var(--color-accent-2)] transition-colors"
-            >
-              <Link href={`/profiles/${p.handle || p.id}`} className="no-underline text-white">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span
-                      className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded border shrink-0 ${
-                        p.profile_type === "company"
-                          ? "bg-[#0f1f3a] text-[#7ea5e2] border-[#1f365a]"
-                          : "bg-[var(--color-bg-2)] text-[var(--color-text-muted)] border-[var(--color-border)]"
-                      }`}
-                    >
-                      {p.profile_type === "company" ? t.company : t.person}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="font-medium truncate">
-                        {p.full_name || p.handle || p.profile_url}
-                      </div>
-                      {(p.tagline || p.headline) && (
-                        <div className="text-sm text-[var(--color-text-muted)] truncate">
-                          {p.tagline || p.headline}
-                        </div>
-                      )}
-                      <div className="text-xs text-[var(--color-text-muted)] mt-1 truncate">
-                        {p.profile_url}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right text-xs text-[var(--color-text-muted)] shrink-0">
-                    <div>
-                      <span className="text-white font-medium">{p.posts_count ?? 0}</span> {t.posts}
-                    </div>
-                    {p.last_synced_at && (
-                      <div>{t.synced} {new Date(p.last_synced_at).toLocaleString()}</div>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {profiles && profiles.length > 0 && <ProfileList profiles={profiles} />}
       </section>
     </div>
   );
