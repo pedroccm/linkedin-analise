@@ -40,9 +40,18 @@ export async function StatsCard({ profileId, t }: { profileId: string; t: Dict["
 
   const totalReposts = reposts.reduce((a, b) => a + b, 0);
 
+  // Average posts per week across the covered date range.
+  const weeksSpan =
+    minDate && maxDate
+      ? Math.max(1, (maxDate.getTime() - minDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
+      : 1;
+  const perWeek = posts.length / weeksSpan;
+  const perWeekStr = perWeek >= 10 ? Math.round(perWeek).toString() : perWeek.toFixed(1);
+
   const s = t.stats;
   const stats = [
     { label: s.posts, value: fmt(posts.length) },
+    { label: s.perWeek, value: perWeekStr },
     { label: s.totalEngagement, value: fmt(totalEngagement) },
     { label: s.avgLikes, value: fmt(likes.reduce((a, b) => a + b, 0) / likes.length) },
     { label: s.medianLikes, value: fmt(median(likes)) },

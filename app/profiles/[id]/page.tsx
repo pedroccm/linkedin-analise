@@ -16,7 +16,6 @@ import { fetchTimeline } from "@/lib/timeline";
 import { Tabs, type Tab } from "./tabs";
 import { BackgroundSync } from "./background-sync";
 import { StatsCard } from "./stats-card";
-import { CadenceChart } from "./cadence-chart";
 import { TopEngagedAuthors } from "./top-engaged";
 import { PostsFilter } from "./posts-filter";
 import { PostsPanel } from "./posts-panel";
@@ -467,7 +466,6 @@ async function PostsSection({
   return (
     <div className="space-y-6">
       <StatsCard profileId={profileId} t={t} />
-      <CadenceChart profileId={profileId} t={t} />
       {profileType === "person" && <TopEngagedAuthors profileId={profileId} t={t} />}
 
       <PostsPanel posts={posts ?? []} />
