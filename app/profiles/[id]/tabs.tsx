@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Dict } from "@/lib/i18n/dictionaries";
 
 export type Tab =
   | "posts"
@@ -8,31 +9,31 @@ export type Tab =
   | "comments"
   | "employees";
 
-const PERSON_OPTIONS: Array<{ key: Tab; label: string }> = [
-  { key: "posts", label: "Posts" },
-  { key: "reactions", label: "Reactions" },
-  { key: "comments", label: "Comments" },
-];
-
-const COMPANY_OPTIONS: Array<{ key: Tab; label: string }> = [
-  { key: "feed", label: "Feed" },
-  { key: "timeline", label: "Timeline" },
-  { key: "posts", label: "Posts" },
-  { key: "employees", label: "Employees" },
-];
-
 export function Tabs({
   profileId,
   profileType,
   active,
   counts,
+  t,
 }: {
   profileId: string;
   profileType: "person" | "company";
   active: Tab;
   counts: Partial<Record<Tab, number>>;
+  t: Dict["profile"];
 }) {
-  const options = profileType === "company" ? COMPANY_OPTIONS : PERSON_OPTIONS;
+  const personOptions: Array<{ key: Tab; label: string }> = [
+    { key: "posts", label: t.tabPosts },
+    { key: "reactions", label: t.tabReactions },
+    { key: "comments", label: t.tabComments },
+  ];
+  const companyOptions: Array<{ key: Tab; label: string }> = [
+    { key: "feed", label: t.tabFeed },
+    { key: "timeline", label: t.tabTimeline },
+    { key: "posts", label: t.tabPosts },
+    { key: "employees", label: t.tabEmployees },
+  ];
+  const options = profileType === "company" ? companyOptions : personOptions;
   // For companies the default landing is `feed`; for people it's `posts`
   const defaultTab: Tab = profileType === "company" ? "feed" : "posts";
 

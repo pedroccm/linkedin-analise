@@ -2,14 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useTransition } from "react";
-
-const DATE_PRESETS = [
-  { key: "", label: "All time" },
-  { key: "30d", label: "30 days" },
-  { key: "90d", label: "90 days" },
-  { key: "6m", label: "6 months" },
-  { key: "1y", label: "1 year" },
-];
+import { useDict } from "@/lib/i18n/client";
 
 export function PostsFilter({
   profileId,
@@ -26,6 +19,14 @@ export function PostsFilter({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [q, setQ] = useState(currentQuery);
+  const c = useDict().common;
+  const DATE_PRESETS = [
+    { key: "", label: c.allTime },
+    { key: "30d", label: c.d30 },
+    { key: "90d", label: c.d90 },
+    { key: "6m", label: c.m6 },
+    { key: "1y", label: c.y1 },
+  ];
 
   // Debounce text search
   useEffect(() => {
@@ -57,7 +58,7 @@ export function PostsFilter({
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search in posts…"
+          placeholder={c.searchPlaceholder}
           className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm outline-none focus:border-[var(--color-accent-2)]"
         />
       </div>
@@ -82,7 +83,7 @@ export function PostsFilter({
         })}
       </div>
       {isPending && (
-        <span className="text-xs text-[var(--color-text-muted)]">filtering…</span>
+        <span className="text-xs text-[var(--color-text-muted)]">{c.filtering}</span>
       )}
       {/* keep sort in URL — invisible passthrough */}
       <input type="hidden" name="sort" value={currentSort} />

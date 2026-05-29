@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useDict } from "@/lib/i18n/client";
 
 export function SyncButton({
   endpoint,
@@ -17,6 +18,7 @@ export function SyncButton({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
+  const c = useDict().common;
 
   async function handleClick() {
     setError(null);
@@ -26,13 +28,13 @@ export function SyncButton({
       const res = await fetch(endpoint, { method: "POST" });
       const body = await res.json();
       if (!res.ok) {
-        setError(body.error ?? "Sync failed");
+        setError(body.error ?? c.syncFailed);
         return;
       }
       setMessage(`+${body.inserted ?? 0} · ${body.total ?? 0} total`);
       startTransition(() => router.refresh());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Sync failed");
+      setError(err instanceof Error ? err.message : c.syncFailed);
     } finally {
       setBusy(false);
     }
@@ -53,7 +55,7 @@ export function SyncButton({
         disabled={busy || isPending}
         className={cls}
       >
-        {busy ? "Syncing…" : label}
+        {busy ? c.syncing : label}
       </button>
       {error && <span className="text-xs text-[var(--color-danger)]">{error}</span>}
       {message && (

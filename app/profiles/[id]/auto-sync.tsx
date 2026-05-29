@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDict } from "@/lib/i18n/client";
 
 type Step = {
   label: string;
@@ -16,6 +17,7 @@ export function AutoSync({
   profileType: "person" | "company";
 }) {
   const router = useRouter();
+  const as = useDict().profile.autoSync;
   const startedRef = useRef(false);
   const [currentStep, setCurrentStep] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -30,13 +32,13 @@ export function AutoSync({
     const steps: Step[] =
       profileType === "company"
         ? [
-            { label: "Company details + posts", endpoint: `/api/profiles/${profileId}/sync` },
-            { label: "Employees", endpoint: `/api/profiles/${profileId}/sync-employees` },
+            { label: as.details_posts, endpoint: `/api/profiles/${profileId}/sync` },
+            { label: as.employees, endpoint: `/api/profiles/${profileId}/sync-employees` },
           ]
         : [
-            { label: "Details + posts", endpoint: `/api/profiles/${profileId}/sync` },
-            { label: "Reactions", endpoint: `/api/profiles/${profileId}/sync-reactions` },
-            { label: "Comments", endpoint: `/api/profiles/${profileId}/sync-comments` },
+            { label: as.details_posts, endpoint: `/api/profiles/${profileId}/sync` },
+            { label: as.reactions, endpoint: `/api/profiles/${profileId}/sync-reactions` },
+            { label: as.comments, endpoint: `/api/profiles/${profileId}/sync-comments` },
           ];
 
     (async () => {
@@ -85,8 +87,8 @@ export function AutoSync({
         )}
         <span>
           {done
-            ? "All syncs complete"
-            : `Auto-syncing… ${currentStep ? `(${currentStep})` : ""}`}
+            ? as.done
+            : `${as.syncing} ${currentStep ? `(${currentStep})` : ""}`}
         </span>
       </div>
       {results.length > 0 && (

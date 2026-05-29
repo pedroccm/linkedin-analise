@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { Dict } from "@/lib/i18n/dictionaries";
 
 type Agg = {
   name: string;
@@ -7,7 +8,7 @@ type Agg = {
   comments: number;
 };
 
-export async function TopEngagedAuthors({ profileId }: { profileId: string }) {
+export async function TopEngagedAuthors({ profileId, t }: { profileId: string; t: Dict["profile"] }) {
   const supabase = await createClient();
 
   const [{ data: profile }, { data: reactions }, { data: comments }] = await Promise.all([
@@ -73,10 +74,10 @@ export async function TopEngagedAuthors({ profileId }: { profileId: string }) {
     <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-5">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
-          Top 10 — who they engage with
+          {t.topEngaged.title}
         </h3>
         <span className="text-xs text-[var(--color-text-muted)]">
-          {map.size} unique authors · across reactions + comments
+          {map.size} {t.topEngaged.uniqueAuthors}
         </span>
       </div>
       <ul className="grid gap-1">

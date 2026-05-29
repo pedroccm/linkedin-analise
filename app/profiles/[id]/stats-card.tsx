@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { Dict } from "@/lib/i18n/dictionaries";
 
 function fmt(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
@@ -13,7 +14,7 @@ function median(values: number[]): number {
   return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 
-export async function StatsCard({ profileId }: { profileId: string }) {
+export async function StatsCard({ profileId, t }: { profileId: string; t: Dict["profile"] }) {
   const supabase = await createClient();
   const { data: posts } = await supabase
     .from("linkedin_posts")
@@ -40,22 +41,23 @@ export async function StatsCard({ profileId }: { profileId: string }) {
   const repostCount = posts.filter((p) => p.post_type && p.post_type !== "post").length;
   const repostShare = (repostCount / posts.length) * 100;
 
+  const s = t.stats;
   const stats = [
-    { label: "Posts", value: fmt(posts.length) },
-    { label: "Total engagement", value: fmt(totalEngagement) },
-    { label: "Avg likes/post", value: fmt(likes.reduce((a, b) => a + b, 0) / likes.length) },
-    { label: "Median likes/post", value: fmt(median(likes)) },
-    { label: "Avg comments/post", value: fmt(comments.reduce((a, b) => a + b, 0) / comments.length) },
-    { label: "Avg reposts/post", value: fmt(reposts.reduce((a, b) => a + b, 0) / reposts.length) },
-    { label: "Best post (likes)", value: fmt(Math.max(...likes)) },
-    { label: "Reshares share", value: `${repostShare.toFixed(0)}%` },
+    { label: s.posts, value: fmt(posts.length) },
+    { label: s.totalEngagement, value: fmt(totalEngagement) },
+    { label: s.avgLikes, value: fmt(likes.reduce((a, b) => a + b, 0) / likes.length) },
+    { label: s.medianLikes, value: fmt(median(likes)) },
+    { label: s.avgComments, value: fmt(comments.reduce((a, b) => a + b, 0) / comments.length) },
+    { label: s.avgReposts, value: fmt(reposts.reduce((a, b) => a + b, 0) / reposts.length) },
+    { label: s.bestPost, value: fmt(Math.max(...likes)) },
+    { label: s.reshareShare, value: `${repostShare.toFixed(0)}%` },
   ];
 
   return (
     <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-5">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
-          Stats
+          {s.title}
         </h3>
         {minDate && maxDate && (
           <span className="text-xs text-[var(--color-text-muted)]">

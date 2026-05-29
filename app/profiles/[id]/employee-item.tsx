@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { trackEmployee } from "../../actions";
+import { useDict } from "@/lib/i18n/client";
 
 type Employee = {
   id: string;
@@ -26,6 +27,7 @@ export function EmployeeItem({
 }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const p = useDict().profile;
   const isTracked = Boolean(employee.tracked_profile_id);
 
   function handleTrack(formData: FormData) {
@@ -65,7 +67,7 @@ export function EmployeeItem({
               rel="noreferrer"
               className="text-white no-underline hover:underline"
             >
-              {employee.full_name || "Unknown"}
+              {employee.full_name || p.unknown}
             </a>
           ) : (
             <span>{employee.full_name || "Unknown"}</span>
@@ -88,7 +90,7 @@ export function EmployeeItem({
             href={`/profiles/${employee.tracked_profile_id}`}
             className="text-xs px-3 py-1.5 rounded border border-[var(--color-success)] text-[var(--color-success)] no-underline hover:bg-[#0f3a1f] transition-colors"
           >
-            ✓ Tracked
+            {p.tracked}
           </Link>
         ) : (
           <form action={handleTrack}>
@@ -98,7 +100,7 @@ export function EmployeeItem({
               disabled={isPending}
               className="text-xs px-3 py-1.5 rounded border border-[var(--color-border)] hover:border-[var(--color-accent-2)] hover:text-white text-[var(--color-text-muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isPending ? "Adding…" : "+ Track"}
+              {isPending ? p.adding : p.track}
             </button>
           </form>
         )}

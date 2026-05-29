@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useDict } from "@/lib/i18n/client";
 
 type Reaction = {
   id: string;
@@ -21,6 +22,9 @@ const LIMIT = 240;
 
 export function ReactionItem({ reaction }: { reaction: Reaction }) {
   const [expanded, setExpanded] = useState(false);
+  const dict = useDict();
+  const c = dict.common;
+  const p = dict.profile;
   const text = reaction.post_content ?? "";
   const isLong = text.length > LIMIT;
   const visible = expanded || !isLong ? text : text.slice(0, LIMIT).trimEnd() + "…";
@@ -40,7 +44,7 @@ export function ReactionItem({ reaction }: { reaction: Reaction }) {
         </div>
         {reaction.post_url && (
           <a href={reaction.post_url} target="_blank" rel="noreferrer">
-            Open post ↗
+            {c.openPost}
           </a>
         )}
       </div>
@@ -48,14 +52,14 @@ export function ReactionItem({ reaction }: { reaction: Reaction }) {
       <div className="text-xs text-[var(--color-text-muted)] mb-2">
         {reaction.post_author_url ? (
           <a href={reaction.post_author_url} target="_blank" rel="noreferrer">
-            {reaction.post_author_name || "Unknown author"}
+            {reaction.post_author_name || p.unknown}
           </a>
         ) : (
-          <span>{reaction.post_author_name || "Unknown author"}</span>
+          <span>{reaction.post_author_name || p.unknown}</span>
         )}
         {reaction.post_posted_at && (
           <span className="ml-2">
-            · posted {new Date(reaction.post_posted_at).toLocaleDateString()}
+            · {p.postedOn} {new Date(reaction.post_posted_at).toLocaleDateString()}
           </span>
         )}
       </div>
@@ -69,7 +73,7 @@ export function ReactionItem({ reaction }: { reaction: Reaction }) {
               onClick={() => setExpanded((v) => !v)}
               className="mt-2 text-xs text-[var(--color-accent-2)] hover:underline"
             >
-              {expanded ? "− show less" : "+ show more"}
+              {expanded ? c.showLess : c.showMore}
             </button>
           )}
         </div>

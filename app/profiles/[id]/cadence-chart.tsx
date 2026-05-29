@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { Dict } from "@/lib/i18n/dictionaries";
 
 function weekStart(date: Date): Date {
   const d = new Date(date);
@@ -7,7 +8,7 @@ function weekStart(date: Date): Date {
   return d;
 }
 
-export async function CadenceChart({ profileId }: { profileId: string }) {
+export async function CadenceChart({ profileId, t }: { profileId: string; t: Dict["profile"] }) {
   const supabase = await createClient();
   const { data: posts } = await supabase
     .from("linkedin_posts")
@@ -46,16 +47,16 @@ export async function CadenceChart({ profileId }: { profileId: string }) {
     <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-5">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
-          Cadence (posts per week)
+          {t.cadence.title}
         </h3>
         <span className="text-xs text-[var(--color-text-muted)]">
-          last 6 months · {window.reduce((a, b) => a + b.count, 0)} posts shown
+          {t.cadence.last6m} · {window.reduce((a, b) => a + b.count, 0)} {t.cadence.postsShown}
         </span>
       </div>
       <div className="flex items-end gap-1 h-24">
         {window.map((b) => {
           const heightPct = (b.count / maxCount) * 100;
-          const title = `Week of ${b.date.toLocaleDateString()}: ${b.count} post${b.count === 1 ? "" : "s"} · ${b.engagement} engagement`;
+          const title = `${b.date.toLocaleDateString()}: ${b.count} posts · ❤💬↻ ${b.engagement}`;
           return (
             <div
               key={b.date.getTime()}

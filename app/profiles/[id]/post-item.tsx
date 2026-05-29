@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useDict } from "@/lib/i18n/client";
 
 type Post = {
   id: string;
@@ -17,6 +18,9 @@ const COLLAPSED_CHAR_LIMIT = 240;
 
 export function PostItem({ post }: { post: Post }) {
   const [expanded, setExpanded] = useState(false);
+  const dict = useDict();
+  const c = dict.common;
+  const p = dict.profile;
 
   const text = post.text_content ?? "";
   const isLong = text.length > COLLAPSED_CHAR_LIMIT;
@@ -29,12 +33,12 @@ export function PostItem({ post }: { post: Post }) {
         <div>
           {post.posted_at
             ? new Date(post.posted_at).toLocaleString()
-            : "Unknown date"}
+            : p.unknownDate}
           {post.post_type && <span className="ml-2">· {post.post_type}</span>}
         </div>
         {post.post_url && (
           <a href={post.post_url} target="_blank" rel="noreferrer">
-            Open on LinkedIn ↗
+            {c.openOnLinkedIn}
           </a>
         )}
       </div>
@@ -48,7 +52,7 @@ export function PostItem({ post }: { post: Post }) {
               onClick={() => setExpanded((v) => !v)}
               className="mt-2 text-xs text-[var(--color-accent-2)] hover:underline"
             >
-              {expanded ? "− show less" : "+ show more"}
+              {expanded ? c.showLess : c.showMore}
             </button>
           )}
         </div>

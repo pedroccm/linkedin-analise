@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDict } from "@/lib/i18n/client";
 
 type PendingPerson = {
   id: string;
@@ -16,6 +17,7 @@ const STEPS: Array<{ endpoint: string; label: string }> = [
 
 export function BackgroundSync({ pending }: { pending: PendingPerson[] }) {
   const router = useRouter();
+  const bg = useDict().profile.bgSync;
   const startedRef = useRef<string>("");
   const [progress, setProgress] = useState<{
     index: number;
@@ -82,8 +84,8 @@ export function BackgroundSync({ pending }: { pending: PendingPerson[] }) {
           )}
           <span className="font-medium">
             {finished
-              ? `Background sync done · ${done} ok${failed > 0 ? ` · ${failed} failed` : ""}`
-              : `Syncing in background ${progress?.index ?? 0}/${pending.length}`}
+              ? `${bg.done} · ${done} ${bg.ok}${failed > 0 ? ` · ${failed} ${bg.failed}` : ""}`
+              : `${bg.syncing} ${progress?.index ?? 0}/${pending.length}`}
           </span>
           {finished && (
             <button

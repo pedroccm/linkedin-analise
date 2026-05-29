@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useDict } from "@/lib/i18n/client";
 
 type Author = {
   id: string;
@@ -27,6 +28,9 @@ const COLLAPSED_CHAR_LIMIT = 240;
 
 export function FeedPostItem({ post }: { post: FeedPost }) {
   const [expanded, setExpanded] = useState(false);
+  const dict = useDict();
+  const c = dict.common;
+  const p = dict.profile;
 
   const text = post.text_content ?? "";
   const isLong = text.length > COLLAPSED_CHAR_LIMIT;
@@ -59,7 +63,7 @@ export function FeedPostItem({ post }: { post: FeedPost }) {
               href={`/profiles/${post.author.id}`}
               className="text-sm font-medium text-white no-underline hover:underline truncate block"
             >
-              {post.author.full_name || post.author.handle || "Unknown"}
+              {post.author.full_name || post.author.handle || p.unknown}
             </Link>
             <div className="text-xs text-[var(--color-text-muted)] flex items-center gap-2">
               <span
@@ -84,7 +88,7 @@ export function FeedPostItem({ post }: { post: FeedPost }) {
               rel="noreferrer"
               className="text-xs text-[var(--color-text-muted)] hover:text-white no-underline shrink-0"
             >
-              Open ↗
+              {c.open}
             </a>
           )}
         </div>
@@ -99,7 +103,7 @@ export function FeedPostItem({ post }: { post: FeedPost }) {
               onClick={() => setExpanded((v) => !v)}
               className="mt-2 text-xs text-[var(--color-accent-2)] hover:underline"
             >
-              {expanded ? "− show less" : "+ show more"}
+              {expanded ? c.showLess : c.showMore}
             </button>
           )}
         </div>

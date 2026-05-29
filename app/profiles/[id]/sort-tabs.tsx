@@ -1,13 +1,7 @@
 import Link from "next/link";
+import type { Dict } from "@/lib/i18n/dictionaries";
 
 export type SortKey = "recent" | "likes" | "comments" | "reposts";
-
-const OPTIONS: Array<{ key: SortKey; label: string }> = [
-  { key: "recent", label: "Recent" },
-  { key: "likes", label: "Most likes" },
-  { key: "comments", label: "Most comments" },
-  { key: "reposts", label: "Most reposts" },
-];
 
 export function SortTabs({
   profileId,
@@ -15,13 +9,22 @@ export function SortTabs({
   range = "",
   query = "",
   tab = "",
+  common,
 }: {
   profileId: string;
   active: SortKey;
   range?: string;
   query?: string;
   tab?: string;
+  common: Dict["common"];
 }) {
+  const OPTIONS: Array<{ key: SortKey; label: string }> = [
+    { key: "recent", label: common.sortRecent },
+    { key: "likes", label: common.sortLikes },
+    { key: "comments", label: common.sortComments },
+    { key: "reposts", label: common.sortReposts },
+  ];
+
   function hrefFor(key: SortKey): string {
     const params = new URLSearchParams();
     if (tab) params.set("tab", tab);

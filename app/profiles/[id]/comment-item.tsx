@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useDict } from "@/lib/i18n/client";
 
 type Comment = {
   id: string;
@@ -19,6 +20,9 @@ const LIMIT = 240;
 
 export function CommentItem({ comment }: { comment: Comment }) {
   const [expanded, setExpanded] = useState(false);
+  const dict = useDict();
+  const c = dict.common;
+  const p = dict.profile;
   const text = comment.commentary ?? "";
   const isLong = text.length > LIMIT;
   const visible = expanded || !isLong ? text : text.slice(0, LIMIT).trimEnd() + "…";
@@ -27,13 +31,13 @@ export function CommentItem({ comment }: { comment: Comment }) {
     <li className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-4">
       <div className="flex items-center justify-between gap-3 text-xs text-[var(--color-text-muted)] mb-2">
         <div className="truncate">
-          on post by{" "}
+          {p.onPostBy}{" "}
           {comment.parent_post_author_url ? (
             <a href={comment.parent_post_author_url} target="_blank" rel="noreferrer">
-              {comment.parent_post_author_name || "unknown"}
+              {comment.parent_post_author_name || p.unknown}
             </a>
           ) : (
-            <span>{comment.parent_post_author_name || "unknown"}</span>
+            <span>{comment.parent_post_author_name || p.unknown}</span>
           )}
           {comment.commented_at && (
             <span className="ml-2">
@@ -43,7 +47,7 @@ export function CommentItem({ comment }: { comment: Comment }) {
         </div>
         {comment.comment_url && (
           <a href={comment.comment_url} target="_blank" rel="noreferrer">
-            Open ↗
+            {c.open}
           </a>
         )}
       </div>
@@ -57,7 +61,7 @@ export function CommentItem({ comment }: { comment: Comment }) {
               onClick={() => setExpanded((v) => !v)}
               className="mt-2 text-xs text-[var(--color-accent-2)] hover:underline"
             >
-              {expanded ? "− show less" : "+ show more"}
+              {expanded ? c.showLess : c.showMore}
             </button>
           )}
         </div>

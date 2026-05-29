@@ -20,8 +20,13 @@ import { CadenceChart } from "./cadence-chart";
 import { TopEngagedAuthors } from "./top-engaged";
 import { PostsFilter } from "./posts-filter";
 import { AutoSync } from "./auto-sync";
+import { getServerI18n } from "@/lib/i18n/server";
+import type { Dict } from "@/lib/i18n/dictionaries";
 
 export const dynamic = "force-dynamic";
+
+type ProfileT = Dict["profile"];
+type CommonT = Dict["common"];
 
 const SORT_CONFIG: Record<SortKey, { column: string; ascending: boolean }> = {
   recent: { column: "posted_at", ascending: false },
@@ -130,6 +135,10 @@ export default async function ProfilePage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
+  const { dict } = await getServerI18n();
+  const t = dict.profile;
+  const common = dict.common;
+
   const { data: profile } = await supabase
     .from("linkedin_profiles")
     .select("*")
@@ -168,7 +177,7 @@ export default async function ProfilePage({
     pendingSync =
       linkedPeople
         ?.filter((p) => p.last_synced_at === null)
-        .map((p) => ({ id: p.id, name: p.full_name || p.handle || "Unknown" })) ?? [];
+        .map((p) => ({ id: p.id, name: p.full_name || p.handle || t.unknown })) ?? [];
     const feedIds = [profile.id, ...companyLinkedPersonIds];
 
     const [{ count: feedC }, { count: rxC }, { count: cmC }] = await Promise.all([
@@ -210,7 +219,7 @@ export default async function ProfilePage({
           href="/"
           className="text-sm text-[var(--color-text-muted)] no-underline hover:text-white"
         >
-          ← Back to profiles
+          {common.back}
         </Link>
       </div>
 
@@ -245,19 +254,19 @@ export default async function ProfilePage({
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded border bg-[var(--color-bg-2)] text-[var(--color-text-muted)] border-[var(--color-border)]">
-                  {isCompany ? "Company" : "Person"}
+                  {isCompany ? dict.home.company : dict.home.person}
                 </span>
                 <h1 className="text-2xl font-semibold">
-                  {profile.full_name || profile.handle || "Untitled profile"}
+                  {profile.full_name || profile.handle || t.untitled}
                 </h1>
                 {!isCompany && (
                   <>
-                    <ProfileChip active={!!profile.verified} label="Verified" tone="good" />
-                    <ProfileChip active={!!profile.creator} label="Creator" tone="good" />
-                    <ProfileChip active={!!profile.influencer} label="Influencer" tone="good" />
-                    <ProfileChip active={!!profile.premium} label="Premium" />
-                    <ProfileChip active={!!profile.open_to_work} label="Open to work" tone="warn" />
-                    <ProfileChip active={!!profile.hiring} label="Hiring" tone="warn" />
+                    <ProfileChip active={!!profile.verified} label={t.verified} tone="good" />
+                    <ProfileChip active={!!profile.creator} label={t.creator} tone="good" />
+                    <ProfileChip active={!!profile.influencer} label={t.influencer} tone="good" />
+                    <ProfileChip active={!!profile.premium} label={t.premium} />
+                    <ProfileChip active={!!profile.open_to_work} label={t.openToWork} tone="warn" />
+                    <ProfileChip active={!!profile.hiring} label={t.hiring} tone="warn" />
                   </>
                 )}
               </div>
@@ -268,7 +277,7 @@ export default async function ProfilePage({
               )}
               {!isCompany && company && (
                 <div className="mt-2 text-sm">
-                  <span className="text-[var(--color-text-muted)]">Works at </span>
+                  <span className="text-[var(--color-text-muted)]">{t.worksAt} </span>
                   <Link
                     href={`/profiles/${company.id}`}
                     className="text-[var(--color-accent-2)] hover:underline"
@@ -289,11 +298,11 @@ export default async function ProfilePage({
                       return (
                         <span>
                           <span className="text-white font-medium">{value}</span>{" "}
-                          employees
+                          {t.employees}
                         </span>
                       );
                     })()}
-                    {profile.founded_year && <span>Founded {profile.founded_year}</span>}
+                    {profile.founded_year && <span>{t.founded} {profile.founded_year}</span>}
                     {profile.website && (
                       <a href={profile.website} target="_blank" rel="noreferrer">
                         {profile.website.replace(/^https?:\/\//, "")}
@@ -304,7 +313,7 @@ export default async function ProfilePage({
                         <span className="text-white font-medium">
                           {profile.followers_count.toLocaleString()}
                         </span>{" "}
-                        followers
+                        {t.followers}
                       </span>
                     )}
                   </>
@@ -316,7 +325,7 @@ export default async function ProfilePage({
                         <span className="text-white font-medium">
                           {profile.connections_count.toLocaleString()}
                         </span>{" "}
-                        connections
+                        {t.connections}
                       </span>
                     )}
                     {typeof profile.followers_count === "number" && (
@@ -324,7 +333,7 @@ export default async function ProfilePage({
                         <span className="text-white font-medium">
                           {profile.followers_count.toLocaleString()}
                         </span>{" "}
-                        followers
+                        {t.followers}
                       </span>
                     )}
                   </>
@@ -342,7 +351,7 @@ export default async function ProfilePage({
             <div className="flex gap-2 shrink-0">
               <SyncButton
                 endpoint={`/api/profiles/${profile.id}/sync`}
-                label={isCompany ? "Sync company + posts" : "Sync details + posts"}
+                label={isCompany ? t.syncCompanyPosts : t.syncDetailsPosts}
               />
               <DeleteProfileButton
                 profileId={profile.id}
@@ -355,7 +364,7 @@ export default async function ProfilePage({
           {profile.about && (
             <details className="mt-5">
               <summary className="cursor-pointer text-sm text-[var(--color-accent-2)] hover:underline">
-                About
+                {t.about}
               </summary>
               <p className="mt-2 text-sm whitespace-pre-wrap text-[var(--color-text-muted)]">
                 {profile.about}
@@ -371,7 +380,7 @@ export default async function ProfilePage({
 
       {isCompany && <BackgroundSync pending={pendingSync} />}
 
-      <Tabs profileId={profile.id} profileType={profileType} active={tab} counts={counts} />
+      <Tabs profileId={profile.id} profileType={profileType} active={tab} counts={counts} t={t} />
 
       {tab === "posts" && (
         <PostsSection
@@ -380,13 +389,15 @@ export default async function ProfilePage({
           sort={sort}
           range={range}
           query={query}
+          t={t}
+          common={common}
         />
       )}
       {tab === "reactions" && !isCompany && (
-        <ReactionsSection profileId={profile.id} />
+        <ReactionsSection profileId={profile.id} t={t} />
       )}
       {tab === "comments" && !isCompany && (
-        <CommentsSection profileId={profile.id} />
+        <CommentsSection profileId={profile.id} t={t} />
       )}
       {tab === "feed" && isCompany && (
         <FeedSection
@@ -394,6 +405,8 @@ export default async function ProfilePage({
           sort={sort}
           range={range}
           query={query}
+          t={t}
+          common={common}
         />
       )}
       {tab === "timeline" && isCompany && (
@@ -401,10 +414,11 @@ export default async function ProfilePage({
           personIds={companyLinkedPersonIds}
           range={range}
           query={query}
+          t={t}
         />
       )}
       {tab === "employees" && isCompany && (
-        <EmployeesSection profileId={profile.id} highlightId={sp.tracked} />
+        <EmployeesSection profileId={profile.id} highlightId={sp.tracked} t={t} />
       )}
     </div>
   );
@@ -416,12 +430,16 @@ async function PostsSection({
   sort,
   range,
   query,
+  t,
+  common,
 }: {
   profileId: string;
   profileType: "person" | "company";
   sort: SortKey;
   range: string;
   query: string;
+  t: ProfileT;
+  common: CommonT;
 }) {
   const supabase = await createClient();
   const { column, ascending } = SORT_CONFIG[sort];
@@ -441,14 +459,14 @@ async function PostsSection({
 
   return (
     <div className="space-y-6">
-      <StatsCard profileId={profileId} />
-      <CadenceChart profileId={profileId} />
-      {profileType === "person" && <TopEngagedAuthors profileId={profileId} />}
+      <StatsCard profileId={profileId} t={t} />
+      <CadenceChart profileId={profileId} t={t} />
+      {profileType === "person" && <TopEngagedAuthors profileId={profileId} t={t} />}
 
       <section className="space-y-3">
         <div className="flex flex-wrap gap-3 items-center justify-between">
           <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
-            All posts
+            {t.allPosts}
           </h3>
           <SortTabs
             profileId={profileId}
@@ -456,6 +474,7 @@ async function PostsSection({
             range={range}
             query={query}
             tab={profileType === "company" ? "posts" : ""}
+            common={common}
           />
         </div>
         <PostsFilter
@@ -465,12 +484,10 @@ async function PostsSection({
           currentQuery={query}
         />
         <p className="text-xs text-[var(--color-text-muted)]">
-          {posts?.length ?? 0} post{posts?.length === 1 ? "" : "s"} match
+          {posts?.length ?? 0} {t.postsMatch}
         </p>
         {(!posts || posts.length === 0) && (
-          <p className="text-[var(--color-text-muted)] text-sm">
-            No posts match the current filter.
-          </p>
+          <p className="text-[var(--color-text-muted)] text-sm">{t.noPostsFilter}</p>
         )}
         <ul className="grid gap-3">
           {posts?.map((p) => (
@@ -482,7 +499,7 @@ async function PostsSection({
   );
 }
 
-async function ReactionsSection({ profileId }: { profileId: string }) {
+async function ReactionsSection({ profileId, t }: { profileId: string; t: ProfileT }) {
   const supabase = await createClient();
   const { data: reactions } = await supabase
     .from("linkedin_profile_reactions")
@@ -495,17 +512,15 @@ async function ReactionsSection({ profileId }: { profileId: string }) {
   return (
     <section className="space-y-3">
       <div className="flex justify-between items-center">
-        <p className="text-sm text-[var(--color-text-muted)]">
-          Posts this profile reacted to.
-        </p>
+        <p className="text-sm text-[var(--color-text-muted)]">{t.reactionsHint}</p>
         <SyncButton
           endpoint={`/api/profiles/${profileId}/sync-reactions`}
-          label="Sync reactions"
+          label={t.syncReactions}
           variant="secondary"
         />
       </div>
       {(!reactions || reactions.length === 0) && (
-        <p className="text-[var(--color-text-muted)] text-sm">No reactions synced yet.</p>
+        <p className="text-[var(--color-text-muted)] text-sm">{t.noReactions}</p>
       )}
       <ul className="grid gap-3">
         {reactions?.map((r) => (
@@ -516,7 +531,7 @@ async function ReactionsSection({ profileId }: { profileId: string }) {
   );
 }
 
-async function CommentsSection({ profileId }: { profileId: string }) {
+async function CommentsSection({ profileId, t }: { profileId: string; t: ProfileT }) {
   const supabase = await createClient();
   const { data: comments } = await supabase
     .from("linkedin_profile_comments")
@@ -529,17 +544,15 @@ async function CommentsSection({ profileId }: { profileId: string }) {
   return (
     <section className="space-y-3">
       <div className="flex justify-between items-center">
-        <p className="text-sm text-[var(--color-text-muted)]">
-          Comments this profile made on other posts.
-        </p>
+        <p className="text-sm text-[var(--color-text-muted)]">{t.commentsHint}</p>
         <SyncButton
           endpoint={`/api/profiles/${profileId}/sync-comments`}
-          label="Sync comments"
+          label={t.syncComments}
           variant="secondary"
         />
       </div>
       {(!comments || comments.length === 0) && (
-        <p className="text-[var(--color-text-muted)] text-sm">No comments synced yet.</p>
+        <p className="text-[var(--color-text-muted)] text-sm">{t.noComments}</p>
       )}
       <ul className="grid gap-3">
         {comments?.map((c) => (
@@ -555,11 +568,15 @@ async function FeedSection({
   sort,
   range,
   query,
+  t,
+  common,
 }: {
   companyId: string;
   sort: SortKey;
   range: string;
   query: string;
+  t: ProfileT;
+  common: CommonT;
 }) {
   const supabase = await createClient();
 
@@ -618,14 +635,13 @@ async function FeedSection({
   return (
     <div className="space-y-3">
       <p className="text-sm text-[var(--color-text-muted)]">
-        Aggregated feed: posts from this company + <span className="text-white">{trackedCount}</span>{" "}
-        tracked {trackedCount === 1 ? "person" : "people"}.
+        {t.feedDesc} <span className="text-white">{trackedCount}</span> {t.feedPeople}
       </p>
       <div className="flex flex-wrap gap-3 items-center justify-between">
         <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
-          Feed
+          {t.tabFeed}
         </h3>
-        <SortTabs profileId={companyId} active={sort} range={range} query={query} tab="feed" />
+        <SortTabs profileId={companyId} active={sort} range={range} query={query} tab="feed" common={common} />
       </div>
       <PostsFilter
         profileId={companyId}
@@ -634,12 +650,10 @@ async function FeedSection({
         currentQuery={query}
       />
       <p className="text-xs text-[var(--color-text-muted)]">
-        {posts.length} post{posts.length === 1 ? "" : "s"} match
+        {posts.length} {t.postsMatch}
       </p>
       {posts.length === 0 && (
-        <p className="text-[var(--color-text-muted)] text-sm">
-          No posts in the feed yet. Sync the company or track some employees first.
-        </p>
+        <p className="text-[var(--color-text-muted)] text-sm">{t.feedEmpty}</p>
       )}
       <ul className="grid gap-3">
         {posts.map((p) => (
@@ -654,19 +668,17 @@ async function CompanyTimelineSection({
   personIds,
   range,
   query,
+  t,
 }: {
   personIds: string[];
   range: string;
   query: string;
+  t: ProfileT;
 }) {
   if (personIds.length === 0) {
     return (
       <section className="space-y-3">
-        <p className="text-sm text-[var(--color-text-muted)]">
-          Timeline shows likes and comments from the people you track at this company.
-          Track an employee first using the <span className="text-white">+ Track</span> button
-          in the Employees tab.
-        </p>
+        <p className="text-sm text-[var(--color-text-muted)]">{t.timelineNoPeople}</p>
       </section>
     );
   }
@@ -681,17 +693,14 @@ async function CompanyTimelineSection({
   return (
     <div className="space-y-3">
       <p className="text-sm text-[var(--color-text-muted)]">
-        Likes and comments from <span className="text-white">{personIds.length}</span>{" "}
-        tracked {personIds.length === 1 ? "person" : "people"} at this company.
+        {t.timelineDesc} <span className="text-white">{personIds.length}</span>{" "}
+        {t.timelinePeople}
       </p>
       <p className="text-xs text-[var(--color-text-muted)]">
-        {rows.length} {rows.length === 1 ? "activity" : "activities"}
+        {rows.length} {t.tabTimeline.toLowerCase()}
       </p>
       {rows.length === 0 && (
-        <p className="text-[var(--color-text-muted)] text-sm">
-          No activity yet. Run <span className="text-white">Sync reactions</span> /{" "}
-          <span className="text-white">Sync comments</span> on a tracked person.
-        </p>
+        <p className="text-[var(--color-text-muted)] text-sm">{t.timelineEmpty}</p>
       )}
       <ul className="grid gap-3">
         {rows.map((row) => (
@@ -705,9 +714,11 @@ async function CompanyTimelineSection({
 async function EmployeesSection({
   profileId,
   highlightId,
+  t,
 }: {
   profileId: string;
   highlightId?: string;
+  t: ProfileT;
 }) {
   const supabase = await createClient();
 
@@ -741,7 +752,7 @@ async function EmployeesSection({
       {trackedPeople && trackedPeople.length > 0 && (
         <section className="space-y-3">
           <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
-            Tracked people at this company ({trackedPeople.length})
+            {t.trackedTitle} ({trackedPeople.length})
           </h3>
           <ul className="grid gap-2">
             {trackedPeople.map((p) => (
@@ -764,7 +775,7 @@ async function EmployeesSection({
                   className="flex-1 min-w-0 no-underline text-white"
                 >
                   <div className="text-sm font-medium truncate">
-                    {p.full_name || p.handle || "Unknown"}
+                    {p.full_name || p.handle || t.unknown}
                   </div>
                   {p.headline && (
                     <div className="text-xs text-[var(--color-text-muted)] truncate">
@@ -783,42 +794,38 @@ async function EmployeesSection({
 
       {/* Add a person URL manually, pre-linked to this company */}
       <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-4">
-        <h3 className="text-sm font-semibold mb-2">Add a person at this company</h3>
+        <h3 className="text-sm font-semibold mb-2">{t.addPersonTitle}</h3>
         <form action={addProfile} className="flex flex-col sm:flex-row gap-2">
           <input type="hidden" name="company_profile_id" value={profileId} />
           <input
             name="profile_url"
             type="text"
             required
-            placeholder="LinkedIn URL or handle (e.g. /in/williamhgates)"
+            placeholder={t.addPersonPlaceholder}
             className="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-2 text-sm outline-none focus:border-[var(--color-accent-2)]"
           />
           <button
             type="submit"
             className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] text-white font-medium px-4 py-2 rounded text-sm transition-colors"
           >
-            Add
+            {t.add}
           </button>
         </form>
-        <p className="text-xs text-[var(--color-text-muted)] mt-2">
-          Use this when the person isn&apos;t in the scraped list below.
-        </p>
+        <p className="text-xs text-[var(--color-text-muted)] mt-2">{t.addPersonHint}</p>
       </section>
 
       {/* Scraped employees list */}
       <section className="space-y-3">
         <div className="flex justify-between items-center">
-          <p className="text-sm text-[var(--color-text-muted)]">
-            People who currently work at this company (Short mode · up to 25).
-          </p>
+          <p className="text-sm text-[var(--color-text-muted)]">{t.employeesHint}</p>
           <SyncButton
             endpoint={`/api/profiles/${profileId}/sync-employees`}
-            label="Sync employees"
+            label={t.syncEmployees}
             variant="secondary"
           />
         </div>
         {(!employees || employees.length === 0) && (
-          <p className="text-[var(--color-text-muted)] text-sm">No employees synced yet.</p>
+          <p className="text-[var(--color-text-muted)] text-sm">{t.noEmployees}</p>
         )}
         <ul className="grid gap-3">
           {sortedEmployees.map((e) => (
