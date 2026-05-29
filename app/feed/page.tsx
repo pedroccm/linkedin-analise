@@ -4,6 +4,7 @@ import { FeedPostItem } from "../profiles/[id]/feed-post-item";
 import { CompanyFilter } from "./company-filter";
 import { FilterBar } from "./filter-bar";
 import { SortPills, type GlobalSortKey } from "./sort-pills";
+import { getServerI18n } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +71,7 @@ export default async function FeedPage({
   const range = typeof sp.range === "string" ? sp.range : "";
   const query = typeof sp.q === "string" ? sp.q : "";
   const companyId = typeof sp.company === "string" ? sp.company : "";
+  const t = (await getServerI18n()).dict.feed;
 
   const { data: companies } = await supabase
     .from("linkedin_profiles")
@@ -113,10 +115,8 @@ export default async function FeedPage({
   return (
     <div className="space-y-6">
       <section>
-        <h1 className="text-2xl font-semibold mb-1">Feed</h1>
-        <p className="text-[var(--color-text-muted)] text-sm">
-          All posts from the profiles you track. Filter by company below.
-        </p>
+        <h1 className="text-2xl font-semibold mb-1">{t.title}</h1>
+        <p className="text-[var(--color-text-muted)] text-sm">{t.subtitle}</p>
       </section>
 
       <section className="flex flex-wrap items-center justify-between gap-3">
@@ -131,13 +131,11 @@ export default async function FeedPage({
       <FilterBar basePath="/feed" currentRange={range} currentQuery={query} />
 
       <p className="text-xs text-[var(--color-text-muted)]">
-        {posts.length} post{posts.length === 1 ? "" : "s"}
+        {posts.length} {t.postsCount}
       </p>
 
       {posts.length === 0 && (
-        <p className="text-[var(--color-text-muted)] text-sm">
-          No posts yet. Track some profiles or sync existing ones.
-        </p>
+        <p className="text-[var(--color-text-muted)] text-sm">{t.empty}</p>
       )}
 
       <ul className="grid gap-3">

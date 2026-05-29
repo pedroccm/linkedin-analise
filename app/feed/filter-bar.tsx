@@ -2,14 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-
-const DATE_PRESETS = [
-  { key: "", label: "All time" },
-  { key: "30d", label: "30 days" },
-  { key: "90d", label: "90 days" },
-  { key: "6m", label: "6 months" },
-  { key: "1y", label: "1 year" },
-];
+import { useDict } from "@/lib/i18n/client";
 
 export function FilterBar({
   basePath,
@@ -24,6 +17,14 @@ export function FilterBar({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [q, setQ] = useState(currentQuery);
+  const c = useDict().common;
+  const DATE_PRESETS = [
+    { key: "", label: c.allTime },
+    { key: "30d", label: c.d30 },
+    { key: "90d", label: c.d90 },
+    { key: "6m", label: c.m6 },
+    { key: "1y", label: c.y1 },
+  ];
 
   useEffect(() => {
     if (q === currentQuery) return;
@@ -54,7 +55,7 @@ export function FilterBar({
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search…"
+          placeholder={c.searchPlaceholder}
           className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm outline-none focus:border-[var(--color-accent-2)]"
         />
       </div>
@@ -79,7 +80,7 @@ export function FilterBar({
         })}
       </div>
       {isPending && (
-        <span className="text-xs text-[var(--color-text-muted)]">filtering…</span>
+        <span className="text-xs text-[var(--color-text-muted)]">{c.filtering}</span>
       )}
     </div>
   );

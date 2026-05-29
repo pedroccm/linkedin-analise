@@ -2,15 +2,9 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useDict } from "@/lib/i18n/client";
 
 export type GlobalSortKey = "recent" | "likes" | "comments" | "reposts";
-
-const OPTIONS: Array<{ key: GlobalSortKey; label: string }> = [
-  { key: "recent", label: "Recent" },
-  { key: "likes", label: "Most likes" },
-  { key: "comments", label: "Most comments" },
-  { key: "reposts", label: "Most reposts" },
-];
 
 export function SortPills({
   basePath,
@@ -20,6 +14,13 @@ export function SortPills({
   currentSort: GlobalSortKey;
 }) {
   const searchParams = useSearchParams();
+  const c = useDict().common;
+  const OPTIONS: Array<{ key: GlobalSortKey; label: string }> = [
+    { key: "recent", label: c.sortRecent },
+    { key: "likes", label: c.sortLikes },
+    { key: "comments", label: c.sortComments },
+    { key: "reposts", label: c.sortReposts },
+  ];
 
   function href(key: GlobalSortKey): string {
     const params = new URLSearchParams(searchParams);

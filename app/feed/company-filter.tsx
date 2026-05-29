@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
+import { useDict } from "@/lib/i18n/client";
 
 type Company = {
   id: string;
@@ -21,6 +22,7 @@ export function CompanyFilter({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const t = useDict().feed;
 
   function setCompany(value: string) {
     const params = new URLSearchParams(searchParams);
@@ -35,14 +37,14 @@ export function CompanyFilter({
   return (
     <div className="flex items-center gap-2">
       <label className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">
-        Company
+        {t.company}
       </label>
       <select
         value={currentCompanyId}
         onChange={(e) => setCompany(e.target.value)}
         className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--color-accent-2)]"
       >
-        <option value="">All companies</option>
+        <option value="">{t.allCompanies}</option>
         {companies.map((c) => (
           <option key={c.id} value={c.id}>
             {c.full_name || c.handle}

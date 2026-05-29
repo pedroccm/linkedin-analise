@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PasswordInput } from "../password-input";
+import { useDict } from "@/lib/i18n/client";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const a = useDict().auth;
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +19,7 @@ export default function ResetPasswordPage() {
     setError(null);
 
     if (password !== confirm) {
-      setError("Passwords don't match.");
+      setError(a.passwordsDontMatch);
       return;
     }
 
@@ -38,27 +40,27 @@ export default function ResetPasswordPage() {
   return (
     <div className="max-w-md mx-auto mt-16">
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-8">
-        <h1 className="text-2xl font-semibold mb-6 text-center">Set new password</h1>
+        <h1 className="text-2xl font-semibold mb-6 text-center">{a.newPasswordTitle}</h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <PasswordInput
-            label="New password"
+            label={a.newPassword}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
             autoComplete="new-password"
-            placeholder="At least 6 characters"
+            placeholder={a.passwordSignupPlaceholder}
           />
 
           <PasswordInput
-            label="Confirm password"
+            label={a.confirmPassword}
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
             minLength={6}
             autoComplete="new-password"
-            placeholder="Repeat password"
+            placeholder={a.repeatPassword}
           />
 
           {error && <p className="text-[var(--color-danger)] text-sm">{error}</p>}
@@ -68,7 +70,7 @@ export default function ResetPasswordPage() {
             disabled={loading}
             className="w-full bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] disabled:opacity-50 text-white font-medium py-2.5 rounded text-sm transition-colors"
           >
-            {loading ? "Saving…" : "Save new password"}
+            {loading ? a.saving : a.saveNewPassword}
           </button>
         </form>
       </div>

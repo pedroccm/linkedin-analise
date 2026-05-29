@@ -4,6 +4,7 @@ import { fetchTimeline } from "@/lib/timeline";
 import { TimelineItem } from "./timeline-item";
 import { CompanyFilter } from "../feed/company-filter";
 import { FilterBar } from "../feed/filter-bar";
+import { getServerI18n } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,7 @@ export default async function TimelinePage({
   const range = typeof sp.range === "string" ? sp.range : "";
   const query = typeof sp.q === "string" ? sp.q : "";
   const companyId = typeof sp.company === "string" ? sp.company : "";
+  const t = (await getServerI18n()).dict.timeline;
 
   const { data: companies } = await supabase
     .from("linkedin_profiles")
@@ -62,10 +64,8 @@ export default async function TimelinePage({
   return (
     <div className="space-y-6">
       <section>
-        <h1 className="text-2xl font-semibold mb-1">Timeline</h1>
-        <p className="text-[var(--color-text-muted)] text-sm">
-          Likes and comments made by the people you track. Filter by company below.
-        </p>
+        <h1 className="text-2xl font-semibold mb-1">{t.title}</h1>
+        <p className="text-[var(--color-text-muted)] text-sm">{t.subtitle}</p>
       </section>
 
       <section className="flex flex-wrap items-center justify-between gap-3">
@@ -79,13 +79,11 @@ export default async function TimelinePage({
       <FilterBar basePath="/timeline" currentRange={range} currentQuery={query} />
 
       <p className="text-xs text-[var(--color-text-muted)]">
-        {rows.length} {rows.length === 1 ? "activity" : "activities"}
+        {rows.length} {t.activities}
       </p>
 
       {rows.length === 0 && (
-        <p className="text-[var(--color-text-muted)] text-sm">
-          No activity yet. Sync reactions and comments from your tracked people.
-        </p>
+        <p className="text-[var(--color-text-muted)] text-sm">{t.empty}</p>
       )}
 
       <ul className="grid gap-3">

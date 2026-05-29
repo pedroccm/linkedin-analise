@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useDict } from "@/lib/i18n/client";
 
 export type TimelineKind = "reaction" | "comment";
 
@@ -31,12 +32,15 @@ const LIMIT = 220;
 
 export function TimelineItem({ row }: { row: TimelineRow }) {
   const [expanded, setExpanded] = useState(false);
+  const dict = useDict();
+  const tl = dict.timeline;
+  const c = dict.common;
 
   const verb =
     row.kind === "reaction" ? (
-      <span className="text-[var(--color-danger)] font-medium">❤ liked</span>
+      <span className="text-[var(--color-danger)] font-medium">❤ {tl.liked}</span>
     ) : (
-      <span className="text-[var(--color-accent-2)] font-medium">💬 commented on</span>
+      <span className="text-[var(--color-accent-2)] font-medium">💬 {tl.commentedOn}</span>
     );
 
   const targetSnippet = row.postContent ?? "";
@@ -113,7 +117,7 @@ export function TimelineItem({ row }: { row: TimelineRow }) {
                   onClick={() => setExpanded((v) => !v)}
                   className="block mt-1 text-xs text-[var(--color-accent-2)] hover:underline"
                 >
-                  {expanded ? "− show less" : "+ show more"}
+                  {expanded ? c.showLess : c.showMore}
                 </button>
               )}
             </blockquote>
@@ -126,7 +130,7 @@ export function TimelineItem({ row }: { row: TimelineRow }) {
               rel="noreferrer"
               className="inline-block mt-2 text-xs text-[var(--color-text-muted)] hover:text-white"
             >
-              Open original post ↗
+              {c.openPost}
             </a>
           )}
         </div>

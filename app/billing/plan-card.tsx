@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { formatPrice, type Plan } from "@/lib/plans";
+import { useDict } from "@/lib/i18n/client";
 
 type PixState = {
   paymentId: string;
@@ -15,6 +16,7 @@ type PixState = {
 
 export function PlanCard({ plan, isCurrent }: { plan: Plan; isCurrent: boolean }) {
   const router = useRouter();
+  const t = useDict().billing;
   const [pix, setPix] = useState<PixState | null>(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -94,10 +96,8 @@ export function PlanCard({ plan, isCurrent }: { plan: Plan; isCurrent: boolean }
     return (
       <div className="bg-[var(--color-surface)] border border-[var(--color-success)] rounded-lg p-6 text-center">
         <div className="text-2xl mb-2">✓</div>
-        <div className="text-lg font-semibold mb-1">Payment confirmed</div>
-        <div className="text-sm text-[var(--color-text-muted)]">
-          Your {plan.name} plan is now active. Refreshing…
-        </div>
+        <div className="text-lg font-semibold mb-1">{t.paymentConfirmed}</div>
+        <div className="text-sm text-[var(--color-text-muted)]">{t.planActive}</div>
       </div>
     );
   }
@@ -123,13 +123,13 @@ export function PlanCard({ plan, isCurrent }: { plan: Plan; isCurrent: boolean }
           onClick={copyBrCode}
           className="w-full text-xs bg-[var(--color-bg-2)] hover:bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-2 mb-3 break-all"
         >
-          {copied ? "✓ Copied!" : "Tap to copy PIX code"}
+          {copied ? t.copied : t.copyPix}
         </button>
         <div className="text-xs text-[var(--color-text-muted)] text-center">
           {polling ? (
-            <span>Waiting for payment…</span>
+            <span>{t.pixWaiting}</span>
           ) : status === "EXPIRED" ? (
-            <span className="text-[var(--color-danger)]">PIX expired</span>
+            <span className="text-[var(--color-danger)]">{t.pixExpired}</span>
           ) : (
             <span>Status: {status}</span>
           )}
@@ -160,17 +160,17 @@ export function PlanCard({ plan, isCurrent }: { plan: Plan; isCurrent: boolean }
         <h3 className="text-lg font-semibold">{plan.name}</h3>
         {isCurrent && (
           <span className="text-xs text-[var(--color-success)] uppercase tracking-wide">
-            Current
+            {t.current}
           </span>
         )}
       </div>
-      <p className="text-sm text-[var(--color-text-muted)] mb-4">{plan.description}</p>
+      <p className="text-sm text-[var(--color-text-muted)] mb-4">
+        {plan.tier === "pro" ? t.proDesc : t.starterDesc}
+      </p>
       <div className="text-3xl font-semibold mb-1">{formatPrice(plan.priceCents)}</div>
-      <div className="text-xs text-[var(--color-text-muted)] mb-5">
-        for 30 days · pay via PIX
-      </div>
+      <div className="text-xs text-[var(--color-text-muted)] mb-5">{t.forDays}</div>
       <ul className="space-y-2 mb-6 text-sm flex-1">
-        {plan.features.map((f) => (
+        {(plan.tier === "pro" ? t.proFeatures : t.starterFeatures).map((f) => (
           <li key={f} className="flex gap-2">
             <span className="text-[var(--color-success)] shrink-0">✓</span>
             <span>{f}</span>
@@ -183,7 +183,7 @@ export function PlanCard({ plan, isCurrent }: { plan: Plan; isCurrent: boolean }
         disabled={loading}
         className="w-full bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] disabled:opacity-50 text-white font-medium py-2.5 rounded text-sm transition-colors"
       >
-        {loading ? "Generating PIX…" : isCurrent ? "Renew (+30 days)" : `Get ${plan.name}`}
+        {loading ? t.generatingPix : isCurrent ? t.renew : `${t.get} ${plan.name}`}
       </button>
       {error && (
         <p className="text-xs text-[var(--color-danger)] mt-2">{error}</p>

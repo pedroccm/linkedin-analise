@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSubscriptionStatus } from "@/lib/subscription";
+import { getServerI18n } from "@/lib/i18n/server";
 import { PLANS, type PlanTier } from "@/lib/plans";
 import { PlanCard } from "./plan-card";
 
@@ -19,20 +20,18 @@ export default async function BillingPage({
 
   const status = await getSubscriptionStatus(user.id);
   const { reason } = await searchParams;
+  const t = (await getServerI18n()).dict.billing;
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       <section>
-        <h1 className="text-2xl font-semibold mb-1">Billing</h1>
-        <p className="text-[var(--color-text-muted)] text-sm">
-          Pay via PIX — instant activation, 30 days of access per payment.
-        </p>
+        <h1 className="text-2xl font-semibold mb-1">{t.title}</h1>
+        <p className="text-[var(--color-text-muted)] text-sm">{t.subtitle}</p>
       </section>
 
       {reason === "limit" && (
         <div className="bg-[#3a2e0f] border border-[#5a4a1f] text-[#f5c563] rounded-lg p-4 text-sm">
-          You&apos;ve hit the profile limit of your {PLANS[status.activeTier].name} plan
-          ({status.profileLimit} profile{status.profileLimit === 1 ? "" : "s"}). Upgrade below to add more.
+          {t.limitWarn}
         </div>
       )}
 
@@ -40,20 +39,20 @@ export default async function BillingPage({
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <div className="text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
-              Current plan
+              {t.currentPlan}
             </div>
             <div className="text-xl font-semibold mt-1">
               {PLANS[status.activeTier].name}
               {!status.isActive && status.tier !== "free" && (
                 <span className="ml-2 text-sm text-[var(--color-danger)] font-normal">
-                  (expired)
+                  {t.expired}
                 </span>
               )}
             </div>
           </div>
           <div className="text-right">
             <div className="text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
-              Profiles
+              {t.profiles}
             </div>
             <div className="text-xl font-semibold mt-1">
               {status.profilesUsed} / {status.profileLimit}
@@ -62,7 +61,7 @@ export default async function BillingPage({
           {status.daysLeft !== null && (
             <div className="text-right">
               <div className="text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
-                Days left
+                {t.daysLeft}
               </div>
               <div className="text-xl font-semibold mt-1">{status.daysLeft}</div>
             </div>
@@ -80,10 +79,7 @@ export default async function BillingPage({
         ))}
       </section>
 
-      <p className="text-xs text-[var(--color-text-muted)] text-center">
-        Paying again extends your access by another 30 days from your current expiry.
-        Cancel anytime by simply not renewing.
-      </p>
+      <p className="text-xs text-[var(--color-text-muted)] text-center">{t.footer}</p>
     </div>
   );
 }
