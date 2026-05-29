@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { pickDate, pickNumber, runApifyActor } from "@/lib/apify";
 import { logSync } from "@/lib/sync-log";
+import { mirrorImage } from "@/lib/avatar-storage";
 
 // ===== Shared types =====
 
@@ -285,6 +286,8 @@ export async function syncDetailsAndPosts(opts: {
   if (details) {
     if (isCompany) {
       const c = details as ApifyCompany;
+      const rawLogo = pickPicture(c.logo) ?? c.logoUrl ?? null;
+      const logoUrl = (await mirrorImage(rawLogo, `${profile.id}.jpg`)) ?? rawLogo;
       await supabase
         .from("linkedin_profiles")
         .update({
@@ -293,7 +296,7 @@ export async function syncDetailsAndPosts(opts: {
           headline: c.tagline ?? null,
           tagline: c.tagline ?? null,
           about: c.description ?? c.about ?? null,
-          avatar_url: pickPicture(c.logo) ?? c.logoUrl ?? null,
+          avatar_url: logoUrl,
           cover_url: pickPicture(c.coverImage) ?? c.coverImageUrl ?? null,
           industry: pickIndustry(c),
           employee_count: c.employeeCount ?? c.staffCount ?? null,
@@ -308,6 +311,8 @@ export async function syncDetailsAndPosts(opts: {
     } else {
       const d = details as ApifyPerson;
       const fullName = [d.firstName, d.lastName].filter(Boolean).join(" ").trim() || null;
+      const rawAvatar = pickPicture(d.profilePicture) ?? pickPicture(d.photo) ?? null;
+      const avatarUrl = (await mirrorImage(rawAvatar, `${profile.id}.jpg`)) ?? rawAvatar;
       await supabase
         .from("linkedin_profiles")
         .update({
@@ -317,7 +322,7 @@ export async function syncDetailsAndPosts(opts: {
           handle: d.publicIdentifier ?? undefined,
           headline: d.headline ?? null,
           about: d.about ?? null,
-          avatar_url: pickPicture(d.profilePicture) ?? pickPicture(d.photo) ?? null,
+          avatar_url: avatarUrl,
           cover_url: pickPicture(d.coverPicture),
           connections_count: d.connectionsCount ?? null,
           followers_count: d.followerCount ?? null,
