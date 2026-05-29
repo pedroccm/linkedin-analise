@@ -69,8 +69,8 @@ export default async function BillingPage({
         </div>
       </section>
 
-      <section className="grid md:grid-cols-2 gap-4">
-        {(["starter", "pro"] as PlanTier[]).map((tier) => (
+      <section className="grid md:grid-cols-3 gap-4">
+        {(["starter", "pro", "corporate"] as PlanTier[]).map((tier) => (
           <PlanCard
             key={tier}
             plan={PLANS[tier]}

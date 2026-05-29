@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSubscriptionStatus } from "@/lib/subscription";
+import { workspaceOwnerId } from "@/lib/workspace";
 
 function normalizeProfileUrl(
   input: string
@@ -69,6 +70,8 @@ export async function addProfile(formData: FormData) {
     redirect("/billing?reason=limit");
   }
 
+  const ownerId = await workspaceOwnerId(supabase, user.id);
+
   // Company association only makes sense when adding a person
   const linkCompanyId = parsed.type === "person" ? companyId : null;
 
@@ -76,6 +79,7 @@ export async function addProfile(formData: FormData) {
     .from("linkedin_profiles")
     .upsert(
       {
+        user_id: ownerId,
         profile_url: parsed.url,
         handle: parsed.handle,
         profile_type: parsed.type,
@@ -132,10 +136,13 @@ export async function trackEmployee(formData: FormData) {
     throw new Error("Employee URL is not a valid LinkedIn person profile");
   }
 
+  const ownerId = await workspaceOwnerId(supabase, user.id);
+
   const { data: tracked, error: upsertError } = await supabase
     .from("linkedin_profiles")
     .upsert(
       {
+        user_id: ownerId,
         profile_url: parsed.url,
         handle: parsed.handle || emp.public_identifier,
         profile_type: "person",

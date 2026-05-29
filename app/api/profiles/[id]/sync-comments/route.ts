@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { syncComments } from "@/lib/sync-core";
+import { workspaceOwnerId } from "@/lib/workspace";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -31,7 +32,8 @@ export async function POST(
   }
 
   try {
-    const result = await syncComments({ supabase, userId: user.id, profile });
+    const ownerId = await workspaceOwnerId(supabase, user.id);
+    const result = await syncComments({ supabase, userId: ownerId, profile });
     return NextResponse.json(result);
   } catch (err) {
     return NextResponse.json(

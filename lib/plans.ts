@@ -1,4 +1,4 @@
-export type PlanTier = "free" | "starter" | "pro";
+export type PlanTier = "free" | "starter" | "pro" | "corporate";
 
 export type Plan = {
   tier: PlanTier;
@@ -43,6 +43,21 @@ export const PLANS: Record<PlanTier, Plan> = {
     description: "For agencies and serious analysts",
     features: [
       "Up to 20 LinkedIn profiles",
+      "Unlimited syncs",
+      "Full analytics + filters",
+      "30 days of access per PIX payment",
+      "Priority support",
+    ],
+  },
+  corporate: {
+    tier: "corporate",
+    name: "Corporate",
+    priceCents: 29900,
+    profileLimit: 100,
+    description: "For teams: shared workspace + invite members",
+    features: [
+      "Up to 100 LinkedIn profiles",
+      "Invite your team — shared profiles, tags and feed",
       "Unlimited syncs",
       "Full analytics + filters",
       "30 days of access per PIX payment",

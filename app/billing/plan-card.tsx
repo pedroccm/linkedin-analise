@@ -165,12 +165,21 @@ export function PlanCard({ plan, isCurrent }: { plan: Plan; isCurrent: boolean }
         )}
       </div>
       <p className="text-sm text-[var(--color-text-muted)] mb-4">
-        {plan.tier === "pro" ? t.proDesc : t.starterDesc}
+        {plan.tier === "corporate"
+          ? t.corporateDesc
+          : plan.tier === "pro"
+          ? t.proDesc
+          : t.starterDesc}
       </p>
       <div className="text-3xl font-semibold mb-1">{formatPrice(plan.priceCents)}</div>
       <div className="text-xs text-[var(--color-text-muted)] mb-5">{t.forDays}</div>
       <ul className="space-y-2 mb-6 text-sm flex-1">
-        {(plan.tier === "pro" ? t.proFeatures : t.starterFeatures).map((f) => (
+        {(plan.tier === "corporate"
+          ? t.corporateFeatures
+          : plan.tier === "pro"
+          ? t.proFeatures
+          : t.starterFeatures
+        ).map((f) => (
           <li key={f} className="flex gap-2">
             <span className="text-[var(--color-success)] shrink-0">✓</span>
             <span>{f}</span>

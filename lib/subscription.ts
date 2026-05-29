@@ -1,5 +1,6 @@
 import { PLANS, type PlanTier } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/server";
+import { workspaceOwnerId } from "@/lib/workspace";
 
 export type SubscriptionStatus = {
   tier: PlanTier;
@@ -17,16 +18,20 @@ export async function getSubscriptionStatus(
 ): Promise<SubscriptionStatus> {
   const supabase = await createClient();
 
+  // Plan + profile count are scoped to the workspace owner (the org owner for
+  // members, or the user themselves when solo).
+  const ownerId = await workspaceOwnerId(supabase, userId);
+
   const [{ data: meta }, { count }] = await Promise.all([
     supabase
       .from("linkedin_users_meta")
       .select("plan_tier, subscription_until")
-      .eq("user_id", userId)
+      .eq("user_id", ownerId)
       .maybeSingle(),
     supabase
       .from("linkedin_profiles")
       .select("id", { count: "exact", head: true })
-      .eq("user_id", userId),
+      .eq("user_id", ownerId),
   ]);
 
   const tier: PlanTier = (meta?.plan_tier as PlanTier) ?? "free";

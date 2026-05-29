@@ -6,6 +6,7 @@ import { getServerI18n } from "@/lib/i18n/server";
 import { PLANS } from "@/lib/plans";
 import { updateAccountName } from "./actions";
 import { SubmitButton } from "../submit-button";
+import { OrgSection } from "./org-section";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,9 @@ export default async function AccountPage() {
           </Link>
         </div>
       </section>
+
+      {/* Organization */}
+      <OrgSection a={t} />
 
       {/* Logout */}
       <section>

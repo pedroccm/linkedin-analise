@@ -56,7 +56,7 @@ export default async function AdminDashboardPage() {
   ).length;
 
   // Active subs by tier (subscription_until in the future)
-  const activeByTier: Record<PlanTier, number> = { free: 0, starter: 0, pro: 0 };
+  const activeByTier: Record<PlanTier, number> = { free: 0, starter: 0, pro: 0, corporate: 0 };
   let activePaid = 0;
   for (const m of metas.data ?? []) {
     const active =
@@ -72,7 +72,8 @@ export default async function AdminDashboardPage() {
 
   const mrrCents =
     activeByTier.starter * PLANS.starter.priceCents +
-    activeByTier.pro * PLANS.pro.priceCents;
+    activeByTier.pro * PLANS.pro.priceCents +
+    activeByTier.corporate * PLANS.corporate.priceCents;
 
   const revenue30dCents = (payments30.data ?? [])
     .filter((p) => p.status === "paid")

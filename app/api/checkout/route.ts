@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   }
 
   const { plan } = (await req.json().catch(() => ({}))) as { plan?: PlanTier };
-  if (plan !== "starter" && plan !== "pro") {
+  if (plan !== "starter" && plan !== "pro" && plan !== "corporate") {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
   }
 
