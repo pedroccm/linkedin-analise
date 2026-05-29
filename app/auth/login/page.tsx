@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PasswordInput } from "../password-input";
+import { useDict } from "@/lib/i18n/client";
 
 type Mode = "signin" | "signup" | "forgot";
 
 export default function LoginPage() {
   const router = useRouter();
+  const a = useDict().auth;
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,7 +53,7 @@ export default function LoginPage() {
         router.push("/");
         router.refresh();
       } else {
-        setInfo("Account created. Check your email to confirm before signing in.");
+        setInfo(a.signupConfirm);
       }
       return;
     }
@@ -64,7 +66,7 @@ export default function LoginPage() {
       setError(error.message);
       return;
     }
-    setInfo("Check your email for the password reset link.");
+    setInfo(a.resetSent);
   }
 
   function switchMode(next: Mode) {
@@ -74,15 +76,15 @@ export default function LoginPage() {
   }
 
   const title =
-    mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Reset password";
+    mode === "signin" ? a.signInTitle : mode === "signup" ? a.signUpTitle : a.forgotTitle;
 
   const submitLabel = loading
     ? "…"
     : mode === "signin"
-    ? "Sign in"
+    ? a.signInBtn
     : mode === "signup"
-    ? "Create account"
-    : "Send reset link";
+    ? a.signUpBtn
+    : a.sendResetBtn;
 
   return (
     <div className="max-w-md mx-auto mt-16">
@@ -100,7 +102,7 @@ export default function LoginPage() {
                   : "text-[var(--color-text-muted)]"
               }`}
             >
-              Sign in
+              {a.signInTab}
             </button>
             <button
               type="button"
@@ -111,14 +113,14 @@ export default function LoginPage() {
                   : "text-[var(--color-text-muted)]"
               }`}
             >
-              Sign up
+              {a.signUpTab}
             </button>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block">
-            <span className="text-sm text-[var(--color-text-muted)]">Email</span>
+            <span className="text-sm text-[var(--color-text-muted)]">{a.email}</span>
             <input
               type="email"
               value={email}
@@ -126,19 +128,19 @@ export default function LoginPage() {
               required
               autoComplete="email"
               className="mt-1 w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-accent-2)]"
-              placeholder="you@email.com"
+              placeholder={a.emailPlaceholder}
             />
           </label>
 
           {mode !== "forgot" && (
             <PasswordInput
-              label="Password"
+              label={a.password}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
               autoComplete={mode === "signin" ? "current-password" : "new-password"}
-              placeholder={mode === "signup" ? "At least 6 characters" : "Your password"}
+              placeholder={mode === "signup" ? a.passwordSignupPlaceholder : a.passwordSigninPlaceholder}
             />
           )}
 
@@ -160,7 +162,7 @@ export default function LoginPage() {
                 onClick={() => switchMode("forgot")}
                 className="text-[var(--color-text-muted)] hover:text-white"
               >
-                Forgot password?
+                {a.forgotLink}
               </button>
             )}
             {mode === "forgot" && (
@@ -169,7 +171,7 @@ export default function LoginPage() {
                 onClick={() => switchMode("signin")}
                 className="text-[var(--color-text-muted)] hover:text-white"
               >
-                ← Back to sign in
+                {a.backToSignIn}
               </button>
             )}
           </div>

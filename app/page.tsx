@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { addProfile } from "./actions";
 import { SyncAllButton } from "./sync-all-button";
 import { Landing } from "./landing";
+import { getServerI18n } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,9 @@ export default async function Home() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return <Landing />;
+  const { dict } = await getServerI18n();
+  if (!user) return <Landing dict={dict} />;
+  const t = dict.home;
 
   const { data: profiles, error } = await supabase
     .from("linkedin_profiles")
@@ -28,13 +31,11 @@ export default async function Home() {
   return (
     <div className="space-y-8">
       <section className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold mb-1">Profiles</h1>
-          <p className="text-[var(--color-text-muted)] text-sm">
-            Add a LinkedIn profile URL or handle. We&apos;ll save it here and fetch posts via Apify on demand.
-          </p>
+        <div className="max-w-2xl">
+          <h1 className="text-2xl font-semibold mb-1">{t.heading}</h1>
+          <p className="text-[var(--color-text-muted)] text-sm">{t.subtitle}</p>
         </div>
-        <SyncAllButton profiles={syncRefs} />
+        {profiles && profiles.length > 0 && <SyncAllButton profiles={syncRefs} />}
       </section>
 
       <section className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-5">
@@ -43,19 +44,17 @@ export default async function Home() {
             name="profile_url"
             type="text"
             required
-            placeholder="LinkedIn URL — person (/in/...) or company (/company/...)"
+            placeholder={t.placeholder}
             className="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-4 py-2 text-sm outline-none focus:border-[var(--color-accent-2)]"
           />
           <button
             type="submit"
             className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] text-white font-medium px-5 py-2 rounded text-sm transition-colors"
           >
-            Add
+            {t.add}
           </button>
         </form>
-        <p className="text-xs text-[var(--color-text-muted)] mt-2">
-          For companies, we also fetch up to 100 current employees on demand.
-        </p>
+        <p className="text-xs text-[var(--color-text-muted)] mt-2">{t.companyHint}</p>
       </section>
 
       <section>
@@ -65,9 +64,7 @@ export default async function Home() {
           </p>
         )}
         {!error && profiles && profiles.length === 0 && (
-          <p className="text-[var(--color-text-muted)] text-sm">
-            No profiles yet. Add one above to get started.
-          </p>
+          <p className="text-[var(--color-text-muted)] text-sm">{t.empty}</p>
         )}
         <ul className="grid gap-3">
           {profiles?.map((p) => (
@@ -85,7 +82,7 @@ export default async function Home() {
                           : "bg-[var(--color-bg-2)] text-[var(--color-text-muted)] border-[var(--color-border)]"
                       }`}
                     >
-                      {p.profile_type === "company" ? "Company" : "Person"}
+                      {p.profile_type === "company" ? t.company : t.person}
                     </span>
                     <div className="min-w-0">
                       <div className="font-medium truncate">
@@ -103,10 +100,10 @@ export default async function Home() {
                   </div>
                   <div className="text-right text-xs text-[var(--color-text-muted)] shrink-0">
                     <div>
-                      <span className="text-white font-medium">{p.posts_count ?? 0}</span> posts
+                      <span className="text-white font-medium">{p.posts_count ?? 0}</span> {t.posts}
                     </div>
                     {p.last_synced_at && (
-                      <div>Synced {new Date(p.last_synced_at).toLocaleString()}</div>
+                      <div>{t.synced} {new Date(p.last_synced_at).toLocaleString()}</div>
                     )}
                   </div>
                 </div>

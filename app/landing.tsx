@@ -1,32 +1,33 @@
 import Link from "next/link";
 import { PLANS, formatPrice, type PlanTier } from "@/lib/plans";
+import type { Dict } from "@/lib/i18n/dictionaries";
 
-export function Landing() {
+export function Landing({ dict }: { dict: Dict }) {
+  const t = dict.landing;
   return (
     <div className="space-y-16 max-w-5xl mx-auto py-6">
       {/* Hero */}
       <section className="text-center space-y-5 pt-8">
         <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-          Analyze any LinkedIn profile.
+          {t.heroLine1}
           <br />
-          <span className="text-[var(--color-accent-2)]">Without the noise.</span>
+          <span className="text-[var(--color-accent-2)]">{t.heroLine2}</span>
         </h1>
         <p className="text-lg text-[var(--color-text-muted)] max-w-2xl mx-auto">
-          Track posts, reactions, and comments from any public LinkedIn profile.
-          See engagement trends, content cadence, and who they actually engage with.
+          {t.subtitle}
         </p>
         <div className="flex gap-3 justify-center flex-wrap pt-2">
           <Link
             href="/auth/login"
             className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] text-white font-semibold px-6 py-3 rounded-md no-underline transition-colors"
           >
-            Start free
+            {t.startFree}
           </Link>
           <a
             href="#pricing"
             className="border border-[var(--color-border)] hover:border-[var(--color-accent-2)] text-white font-medium px-6 py-3 rounded-md no-underline transition-colors"
           >
-            See pricing
+            {t.seePricing}
           </a>
         </div>
       </section>
@@ -34,18 +35,9 @@ export function Landing() {
       {/* Features */}
       <section className="grid md:grid-cols-3 gap-5">
         {[
-          {
-            title: "Posts + analytics",
-            body: "Up to 100 posts per profile, with likes, comments, reposts. Sort by date or engagement. Full-text search.",
-          },
-          {
-            title: "Behavioral footprint",
-            body: "See what they react to and comment on. Discover the top 10 authors they engage with most.",
-          },
-          {
-            title: "Cadence & trends",
-            body: "Posts per week chart, average engagement, best post, content vs reshare ratio. All updated on demand.",
-          },
+          { title: t.f1Title, body: t.f1Body },
+          { title: t.f2Title, body: t.f2Body },
+          { title: t.f3Title, body: t.f3Body },
         ].map((f) => (
           <div
             key={f.title}
@@ -60,10 +52,8 @@ export function Landing() {
       {/* Pricing */}
       <section id="pricing" className="space-y-6">
         <div className="text-center">
-          <h2 className="text-3xl font-semibold">Simple pricing</h2>
-          <p className="text-[var(--color-text-muted)] mt-2">
-            Pay via PIX. 30 days of access per payment. Cancel anytime by not renewing.
-          </p>
+          <h2 className="text-3xl font-semibold">{t.pricingTitle}</h2>
+          <p className="text-[var(--color-text-muted)] mt-2">{t.pricingSub}</p>
         </div>
         <div className="grid md:grid-cols-3 gap-4">
           {(["free", "starter", "pro"] as PlanTier[]).map((tier) => {
@@ -83,29 +73,16 @@ export function Landing() {
                   <h3 className="text-lg font-semibold">{plan.name}</h3>
                   {highlighted && (
                     <span className="text-[10px] uppercase tracking-wide bg-[var(--color-accent)] text-white px-2 py-0.5 rounded">
-                      Popular
+                      {t.popular}
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                  {plan.description}
-                </p>
                 <div className="text-3xl font-semibold mb-1">
-                  {plan.priceCents === 0 ? "Free" : formatPrice(plan.priceCents)}
+                  {plan.priceCents === 0 ? formatPrice(0).replace("0,00", "0") : formatPrice(plan.priceCents)}
                 </div>
                 <div className="text-xs text-[var(--color-text-muted)] mb-5">
-                  {plan.priceCents === 0
-                    ? "forever"
-                    : "for 30 days · pay via PIX"}
+                  {plan.priceCents === 0 ? t.forever : t.per30}
                 </div>
-                <ul className="space-y-2 mb-6 text-sm flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex gap-2">
-                      <span className="text-[var(--color-success)] shrink-0">✓</span>
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
                 <Link
                   href="/auth/login"
                   className={
@@ -115,7 +92,7 @@ export function Landing() {
                       : "border border-[var(--color-border)] hover:border-[var(--color-accent-2)] text-white")
                   }
                 >
-                  {plan.priceCents === 0 ? "Start free" : "Sign up"}
+                  {plan.priceCents === 0 ? t.ctaStartFree : t.ctaSignup}
                 </Link>
               </div>
             );
@@ -125,24 +102,12 @@ export function Landing() {
 
       {/* FAQ */}
       <section className="space-y-3 max-w-2xl mx-auto">
-        <h2 className="text-2xl font-semibold text-center mb-6">FAQ</h2>
+        <h2 className="text-2xl font-semibold text-center mb-6">{t.faqTitle}</h2>
         {[
-          {
-            q: "Where does the data come from?",
-            a: "We use Apify's LinkedIn scrapers under the hood. No LinkedIn cookies or login required from you.",
-          },
-          {
-            q: "Do you charge per sync?",
-            a: "No. All your plan's syncs are unlimited. You only pay the flat monthly fee.",
-          },
-          {
-            q: "Can I upgrade from Free?",
-            a: "Yes, anytime. Your existing data stays, your profile limit just goes up.",
-          },
-          {
-            q: "Is this allowed by LinkedIn?",
-            a: "We scrape only public profile data — same as a human visiting the page. We don't log into anyone's account.",
-          },
+          { q: t.faq1Q, a: t.faq1A },
+          { q: t.faq2Q, a: t.faq2A },
+          { q: t.faq3Q, a: t.faq3A },
+          { q: t.faq4Q, a: t.faq4A },
         ].map((item) => (
           <details
             key={item.q}
@@ -159,7 +124,7 @@ export function Landing() {
           href="/auth/login"
           className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] text-white font-semibold px-6 py-3 rounded-md no-underline transition-colors"
         >
-          Start free now
+          {t.finalCta}
         </Link>
       </section>
     </div>
