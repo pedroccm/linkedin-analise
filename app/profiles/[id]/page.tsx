@@ -22,6 +22,7 @@ import { PostsFilter } from "./posts-filter";
 import { AutoSync } from "./auto-sync";
 import { getServerI18n } from "@/lib/i18n/server";
 import type { Dict } from "@/lib/i18n/dictionaries";
+import { SubmitButton } from "../../submit-button";
 
 export const dynamic = "force-dynamic";
 
@@ -804,12 +805,11 @@ async function EmployeesSection({
             placeholder={t.addPersonPlaceholder}
             className="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-2 text-sm outline-none focus:border-[var(--color-accent-2)]"
           />
-          <button
-            type="submit"
+          <SubmitButton
+            idle={t.add}
+            pending={t.adding}
             className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] text-white font-medium px-4 py-2 rounded text-sm transition-colors"
-          >
-            {t.add}
-          </button>
+          />
         </form>
         <p className="text-xs text-[var(--color-text-muted)] mt-2">{t.addPersonHint}</p>
       </section>

@@ -85,6 +85,7 @@ export const dictionaries = {
         "Adicione o primeiro perfil de uma empresa ou pessoa e comece a acompanhar. A gente monitora por você.",
       placeholder: "Cole o link do LinkedIn (perfil ou empresa)",
       add: "Adicionar",
+      adding: "Adicionando…",
       companyHint:
         "Para empresas, também trazemos quem trabalha lá.",
       empty: "Você ainda não acompanha ninguém. Adicione o primeiro acima.",
@@ -348,6 +349,7 @@ export const dictionaries = {
         "Add your first company or person profile and start tracking. We keep an eye on them for you.",
       placeholder: "Paste a LinkedIn link (person or company)",
       add: "Add",
+      adding: "Adding…",
       companyHint: "For companies, we also bring in who works there.",
       empty: "You're not tracking anyone yet. Add your first above.",
       person: "Person",

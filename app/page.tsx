@@ -4,6 +4,7 @@ import { addProfile } from "./actions";
 import { SyncAllButton } from "./sync-all-button";
 import { Landing } from "./landing";
 import { getServerI18n } from "@/lib/i18n/server";
+import { SubmitButton } from "./submit-button";
 
 export const dynamic = "force-dynamic";
 
@@ -47,12 +48,11 @@ export default async function Home() {
             placeholder={t.placeholder}
             className="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-4 py-2 text-sm outline-none focus:border-[var(--color-accent-2)]"
           />
-          <button
-            type="submit"
+          <SubmitButton
+            idle={t.add}
+            pending={t.adding}
             className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] text-white font-medium px-5 py-2 rounded text-sm transition-colors"
-          >
-            {t.add}
-          </button>
+          />
         </form>
         <p className="text-xs text-[var(--color-text-muted)] mt-2">{t.companyHint}</p>
       </section>
