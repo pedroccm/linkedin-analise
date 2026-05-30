@@ -56,9 +56,9 @@ function parseTab(
     if (v === "timeline") return "timeline";
     return "feed"; // default for companies
   }
-  if (v === "reactions" || v === "comments" || v === "timeline" || v === "stats")
+  if (v === "posts" || v === "reactions" || v === "comments" || v === "stats")
     return v;
-  return "posts";
+  return "timeline"; // default for people
 }
 
 function rangeStartISO(range: string): string | null {
@@ -377,6 +377,16 @@ export default async function ProfilePage({
                 addLabel={t.addTag}
                 placeholder={t.tagPlaceholder}
               />
+              {profile.about && (
+                <details className="mt-3">
+                  <summary className="cursor-pointer text-sm text-[var(--color-accent-2)] hover:underline">
+                    {t.about}
+                  </summary>
+                  <p className="mt-2 text-sm whitespace-pre-wrap text-[var(--color-text-muted)]">
+                    {profile.about}
+                  </p>
+                </details>
+              )}
             </div>
             <div className="flex gap-2 shrink-0">
               <MonitorToggle
@@ -394,17 +404,6 @@ export default async function ProfilePage({
               />
             </div>
           </div>
-
-          {profile.about && (
-            <details className="mt-5">
-              <summary className="cursor-pointer text-sm text-[var(--color-accent-2)] hover:underline">
-                {t.about}
-              </summary>
-              <p className="mt-2 text-sm whitespace-pre-wrap text-[var(--color-text-muted)]">
-                {profile.about}
-              </p>
-            </details>
-          )}
         </div>
       </section>
 

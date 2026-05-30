@@ -24,10 +24,10 @@ export function Tabs({
   t: Dict["profile"];
 }) {
   const personOptions: Array<{ key: Tab; label: string }> = [
+    { key: "timeline", label: t.tabTimeline },
     { key: "posts", label: t.tabPosts },
     { key: "reactions", label: t.tabReactions },
     { key: "comments", label: t.tabComments },
-    { key: "timeline", label: t.tabTimeline },
     { key: "stats", label: t.tabStats },
   ];
   const companyOptions: Array<{ key: Tab; label: string }> = [
@@ -37,8 +37,8 @@ export function Tabs({
     { key: "employees", label: t.tabEmployees },
   ];
   const options = profileType === "company" ? companyOptions : personOptions;
-  // For companies the default landing is `feed`; for people it's `posts`
-  const defaultTab: Tab = profileType === "company" ? "feed" : "posts";
+  // For companies the default landing is `feed`; for people it's `timeline`
+  const defaultTab: Tab = profileType === "company" ? "feed" : "timeline";
 
   return (
     <div className="flex gap-1 border-b border-[var(--color-border)]">

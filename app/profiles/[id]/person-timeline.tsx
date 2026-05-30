@@ -128,13 +128,27 @@ function Row({
 
   return (
     <li className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <span className="text-xs text-[var(--color-text-muted)] tabular-nums">
           {time}
         </span>
         <span className={`text-sm font-medium ${verb.cls}`}>
           {verb.icon} {verb.text}
         </span>
+        {row.kind !== "post" &&
+          row.postAuthorName &&
+          (row.postAuthorUrl ? (
+            <a
+              href={row.postAuthorUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-white no-underline hover:underline"
+            >
+              {row.postAuthorName}
+            </a>
+          ) : (
+            <span className="text-sm text-white">{row.postAuthorName}</span>
+          ))}
         {row.kind === "post" && (row.likes || row.comments || row.reposts) ? (
           <span className="ml-auto text-xs text-[var(--color-text-muted)] flex gap-3">
             <span>❤ {row.likes ?? 0}</span>

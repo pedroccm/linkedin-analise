@@ -115,20 +115,66 @@ export async function fetchTimeline(
   };
 
   // Merge a person's like + comment on the SAME post into one activity row
-  // (e.g. "commented on & liked ..."). Keyed by actor + post identity.
-  const postKey = (id: string | null, url: string | null): string | null => {
-    if (id) return `id:${id}`;
-    if (url) return `u:${url.split("?")[0].replace(/\/+$/, "").toLowerCase()}`;
-    return null;
-  };
+  // (e.g. "commented on & liked ..."). The reactions and comments come from
+  // different Apify actors that may not share the post id/url, so we match on
+  // any of: post id, normalized post url, or a snippet of the post content.
   const later = (a: string | null, b: string | null): string | null => {
     if (!a) return b;
     if (!b) return a;
     return new Date(a).getTime() >= new Date(b).getTime() ? a : b;
   };
+  const candidates = (
+    actorId: string,
+    id: string | null,
+    url: string | null,
+    content: string | null
+  ): string[] => {
+    const ks: string[] = [];
+    if (id) ks.push(`${actorId}|id:${id}`);
+    if (url)
+      ks.push(
+        `${actorId}|u:${url.split("?")[0].replace(/\/+$/, "").toLowerCase()}`
+      );
+    if (content) {
+      const c = content.replace(/\s+/g, " ").trim().toLowerCase().slice(0, 120);
+      if (c.length >= 20) ks.push(`${actorId}|c:${c}`);
+    }
+    return ks;
+  };
 
-  const acc = new Map<string, TimelineRow>();
+  const index = new Map<string, TimelineRow>(); // candidate key -> group row
+  const groups: TimelineRow[] = [];
   const loose: TimelineRow[] = [];
+
+  const ingest = (base: TimelineRow, keys: string[]) => {
+    let group: TimelineRow | undefined;
+    for (const k of keys) {
+      const g = index.get(k);
+      if (g) {
+        group = g;
+        break;
+      }
+    }
+    if (!group) {
+      groups.push(base);
+      group = base;
+    } else {
+      group.didLike = group.didLike || base.didLike;
+      group.didComment = group.didComment || base.didComment;
+      group.occurredAt = later(group.occurredAt, base.occurredAt);
+      group.kind = group.didComment ? "comment" : "reaction";
+      if (base.didComment && base.commentary) {
+        group.commentary = group.commentary
+          ? `${group.commentary}\n${base.commentary}`.trim()
+          : base.commentary;
+      }
+      group.postUrl = group.postUrl ?? base.postUrl;
+      group.postContent = group.postContent ?? base.postContent;
+      group.postAuthorName = group.postAuthorName ?? base.postAuthorName;
+      group.postAuthorUrl = group.postAuthorUrl ?? base.postAuthorUrl;
+    }
+    for (const k of keys) if (!index.has(k)) index.set(k, group);
+  };
 
   for (const r of (rawReactions as RR[] | null) ?? []) {
     const actor = pickActor(r.actor);
@@ -144,23 +190,11 @@ export async function fetchTimeline(
       postAuthorName: r.post_author_name,
       postAuthorUrl: r.post_author_url,
     };
-    const pk = postKey(r.post_id, r.post_url);
-    if (!pk || !actor) {
-      loose.push(base);
-      continue;
-    }
-    const k = `${actor.id}|${pk}`;
-    const ex = acc.get(k);
-    if (ex) {
-      ex.didLike = true;
-      ex.occurredAt = later(ex.occurredAt, r.reacted_at);
-      ex.postUrl = ex.postUrl ?? r.post_url;
-      ex.postContent = ex.postContent ?? r.post_content;
-      ex.postAuthorName = ex.postAuthorName ?? r.post_author_name;
-      ex.postAuthorUrl = ex.postAuthorUrl ?? r.post_author_url;
-    } else {
-      acc.set(k, { ...base, key: `a:${k}` });
-    }
+    const keys = actor
+      ? candidates(actor.id, r.post_id, r.post_url, r.post_content)
+      : [];
+    if (keys.length === 0) loose.push(base);
+    else ingest(base, keys);
   }
 
   for (const c of (rawComments as RC[] | null) ?? []) {
@@ -177,30 +211,19 @@ export async function fetchTimeline(
       postAuthorName: c.parent_post_author_name,
       postAuthorUrl: c.parent_post_author_url,
     };
-    const pk = postKey(c.parent_post_id, c.parent_post_url);
-    if (!pk || !actor) {
-      loose.push(base);
-      continue;
-    }
-    const k = `${actor.id}|${pk}`;
-    const ex = acc.get(k);
-    if (ex) {
-      ex.didComment = true;
-      ex.kind = "comment"; // comment carries the text, make it primary
-      ex.occurredAt = later(ex.occurredAt, c.commented_at);
-      ex.commentary = ex.commentary
-        ? `${ex.commentary}\n${c.commentary ?? ""}`.trim()
-        : c.commentary;
-      ex.postUrl = ex.postUrl ?? c.parent_post_url ?? c.comment_url;
-      ex.postContent = ex.postContent ?? c.parent_post_content;
-      ex.postAuthorName = ex.postAuthorName ?? c.parent_post_author_name;
-      ex.postAuthorUrl = ex.postAuthorUrl ?? c.parent_post_author_url;
-    } else {
-      acc.set(k, { ...base, key: `a:${k}` });
-    }
+    const keys = actor
+      ? candidates(
+          actor.id,
+          c.parent_post_id,
+          c.parent_post_url,
+          c.parent_post_content
+        )
+      : [];
+    if (keys.length === 0) loose.push(base);
+    else ingest(base, keys);
   }
 
-  const activityRows: TimelineRow[] = [...acc.values(), ...loose];
+  const activityRows: TimelineRow[] = [...groups, ...loose];
 
   type RP = {
     id: string;
