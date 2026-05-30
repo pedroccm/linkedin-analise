@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LIA · Plano de Marketing</title>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg-2: #131826;
+    --surface: #1c2333;
+    --surface-2: #232b3d;
+    --border: rgba(255, 255, 255, 0.08);
+    --accent: #0a66c2;
+    --accent-2: #378fe9;
+    --success: #22c55e;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --text: #e6ebf0;
+    --muted: #8a96a8;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-2); }
+
+  /* Layout */
+  .shell { display: flex; min-height: 100vh; }
+  aside {
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--bg-2);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 8px 20px; margin-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand .logo {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: grid; place-items: center; font-weight: 800; color: #fff;
+  }
+  .brand b { font-size: 17px; }
+  .brand span { display: block; font-size: 11px; color: var(--muted); font-weight: 400; }
+  nav .group { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 18px 8px 6px; }
+  nav button {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    background: none; border: none; color: var(--muted);
+    text-align: left; padding: 8px 10px; border-radius: 8px;
+    font: inherit; font-size: 14px; cursor: pointer; transition: .15s;
+  }
+  nav button:hover { background: var(--surface); color: var(--text); }
+  nav button.active { background: var(--accent); color: #fff; }
+  nav button .num { font-size: 11px; opacity: .6; min-width: 16px; }
+
+  main { flex: 1; padding: 40px 48px 80px; max-width: 920px; }
+  .page { display: none; animation: fade .25s ease; }
+  .page.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px);} to {opacity:1; transform:none;} }
+
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 20px; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 16px; margin: 22px 0 8px; color: var(--accent-2); }
+  .lead { color: var(--muted); font-size: 15px; margin: 0 0 8px; }
+  p { margin: 10px 0; }
+  ul, ol { margin: 10px 0; padding-left: 22px; }
+  li { margin: 5px 0; }
+  code { background: var(--surface); padding: 2px 6px; border-radius: 5px; font-size: 13px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; }
+  .grid { display: grid; gap: 16px; }
+  .grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 720px) { .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; } }
+
+  .tag { display: inline-block; font-size: 11px; padding: 2px 9px; border-radius: 999px; font-weight: 600; }
+  .tag.fact { background: rgba(34,197,94,.15); color: var(--success); }
+  .tag.hyp { background: rgba(245,158,11,.15); color: var(--warn); }
+
+  .callout { border-left: 3px solid var(--warn); background: rgba(245,158,11,.07); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 14px; }
+  .callout.fact { border-color: var(--success); background: rgba(34,197,94,.06); }
+  .callout b { color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  tr:hover td { background: var(--surface); }
+
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .pill { font-size: 13px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+
+  .price-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 860px) { .price-grid { grid-template-columns: 1fr 1fr; } }
+  .plan { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+  .plan.featured { border-color: var(--accent-2); box-shadow: 0 0 0 1px var(--accent-2); }
+  .plan .name { font-weight: 700; }
+  .plan .price { font-size: 24px; font-weight: 800; margin: 6px 0; }
+  .plan .price small { font-size: 13px; color: var(--muted); font-weight: 400; }
+  .plan ul { padding-left: 18px; font-size: 13px; color: var(--muted); }
+
+  .kpi { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+  @media (max-width: 720px){ .kpi { grid-template-columns: 1fr; } }
+  .kpi .item { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .kpi .item b { display:block; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .kpi .item .v { font-size: 18px; font-weight: 700; margin-top: 4px; }
+
+  .quote { background: var(--bg-2); border:1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-size: 18px; line-height: 1.5; }
+  .quote .alt { color: var(--muted); font-size: 14px; margin-top: 8px; }
+
+  .legend { display:flex; gap: 18px; font-size: 13px; color: var(--muted); margin: 8px 0 24px; flex-wrap: wrap; }
+  .legend span { display:flex; align-items:center; gap: 6px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display:inline-block; }
+  .dot.g { background: var(--success); } .dot.y { background: var(--warn); }
+
+  footer { color: var(--muted); font-size: 12px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside>
+    <div class="brand">
+      <div class="logo">L</div>
+      <div><b>LIA</b><span>LinkedIn Intelligence · Marketing</span></div>
+    </div>
+    <nav id="nav">
+      <div class="group">Fundação</div>
+      <button data-page="overview" class="active"><span class="num">00</span> Visão geral</button>
+      <button data-page="icp"><span class="num">01</span> ICP & Personas</button>
+      <button data-page="positioning"><span class="num">02</span> Posicionamento & Valor</button>
+      <button data-page="messaging"><span class="num">03</span> Messaging House</button>
+
+      <div class="group">Site & Conversão</div>
+      <button data-page="landing"><span class="num">04</span> Copy da Landing</button>
+      <button data-page="pricing"><span class="num">05</span> Pricing</button>
+
+      <div class="group">Mercado & Aquisição</div>
+      <button data-page="competitors"><span class="num">06</span> Concorrentes</button>
+      <button data-page="channels"><span class="num">07</span> Canais & Conteúdo</button>
+
+      <div class="group">Operação</div>
+      <button data-page="metrics"><span class="num">08</span> Funil & Métricas</button>
+      <button data-page="roadmap"><span class="num">09</span> Roadmap</button>
+    </nav>
+  </aside>
+
+  <main>
+    <!-- 00 OVERVIEW -->
+    <section class="page active" id="overview">
+      <h1>Plano de Marketing — LIA</h1>
+      <p class="lead">Documento vivo. Cada item da barra lateral é uma peça da estratégia de go-to-market.</p>
+      <div class="legend">
+        <span><span class="dot g"></span> <b style="color:var(--success)">Fato</b> — verificado no produto/código</span>
+        <span><span class="dot y"></span> <b style="color:var(--warn)">Hipótese</b> — a validar com pesquisa/dados reais</span>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">O que é a LIA</h3>
+        <p><span class="tag fact">Fato</span> Ferramenta SaaS de <b>inteligência de LinkedIn</b>: o usuário cadastra perfis e empresas do LinkedIn (por URL ou handle) e a LIA busca automaticamente <b>posts, reações, comentários e funcionários</b>, exibindo análises de <b>engajamento e cadência de postagem</b> em um painel consolidado (feed unificado, timeline cronológica e detalhe por perfil).</p>
+      </div>
+
+      <h2>Como usar este documento</h2>
+      <ol>
+        <li><b>Comece pela Fundação</b> (01 → 03). Tudo o resto deriva dela.</li>
+        <li><b>Landing e Pricing</b> (04, 05) já trazem rascunho de copy pronto para testar.</li>
+        <li><b>Concorrentes e Métricas</b> estão marcados como hipótese — preencha com dados reais antes de usar em decisão.</li>
+      </ol>
+
+      <h2>Resumo dos planos</h2>
+      <div class="price-grid">
+        <div class="plan"><div class="name">Free</div><div class="price">R$ 0</div><ul><li>1 perfil</li></ul></div>
+        <div class="plan"><div class="name">Starter</div><div class="price">R$ 29<small>/mês</small></div><ul><li>5 perfis</li></ul></div>
+        <div class="plan featured"><div class="name">Pro</div><div class="price">R$ 90<small>/mês</small></div><ul><li>20 perfis</li></ul></div>
+        <div class="plan"><div class="name">Corporate</div><div class="price">R$ 299<small>/mês</small></div><ul><li>100 perfis · time</li></ul></div>
+      </div>
+      <p class="lead" style="margin-top:8px"><span class="tag fact">Fato</span> Pagamento via PIX, 30 dias de acesso por pagamento.</p>
+    </section>
+
+    <!-- 01 ICP -->
+    <section class="page" id="icp">
+      <h1>01 · ICP & Personas</h1>
+      <p class="lead">Quem compra, por quê, e o que precisa ouvir.</p>
+      <div class="callout"><span class="tag hyp">Hipótese</span> &nbsp;Os perfis abaixo são <b>hipóteses de partida</b> baseadas no que o produto faz. Validar com entrevistas e dados de uso reais antes de investir em canal pago.</div>
+
+      <h2>Ideal Customer Profile (ICP)</h2>
+      <div class="card">
+        <p>Profissionais e times que <b>dependem de monitorar a atividade pública de pessoas e empresas no LinkedIn</b> — para vender, recrutar, analisar concorrência ou produzir conteúdo — e hoje fazem isso manualmente, rolando o feed sem histórico nem métricas.</p>
+        <div class="pill-row">
+          <span class="pill">Fala português (BR) · paga em PIX</span>
+          <span class="pill">Já usa LinkedIn ativamente</span>
+          <span class="pill">Valoriza dado &gt; achismo</span>
+          <span class="pill">De 1 a ~20 perfis para acompanhar</span>
+        </div>
+      </div>
+
+      <h2>Personas</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3 style="margin-top:0">🎯 Social Seller / SDR</h3>
+          <p><b>Faz:</b> prospecção e social selling no LinkedIn.</p>
+          <p><b>Dor:</b> não sabe quando o lead postou algo relevante para puxar conversa; perde o "gancho" quente.</p>
+          <p><b>Gatilho:</b> quer timing e contexto antes de mandar mensagem.</p>
+          <p><b>Plano provável:</b> Starter / Pro.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">📊 Analista de Concorrência / Marketing</h3>
+          <p><b>Faz:</b> acompanha o que concorrentes e líderes do setor publicam.</p>
+          <p><b>Dor:</b> monitoramento manual, sem histórico nem comparação de engajamento.</p>
+          <p><b>Gatilho:</b> quer benchmark de cadência e temas que engajam.</p>
+          <p><b>Plano provável:</b> Pro / Corporate.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">🧲 Recrutador / Tech Recruiter</h3>
+          <p><b>Faz:</b> mapeia talentos e empresas.</p>
+          <p><b>Dor:</b> quer ver funcionários de uma empresa e quem está ativo/engajado.</p>
+          <p><b>Gatilho:</b> sync de funcionários + atividade recente.</p>
+          <p><b>Plano provável:</b> Pro.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">🏢 Agência / Time de Conteúdo</h3>
+          <p><b>Faz:</b> gere LinkedIn de vários clientes/executivos.</p>
+          <p><b>Dor:</b> precisa de workspace compartilhado e visão consolidada.</p>
+          <p><b>Gatilho:</b> convidar membros, tags, feed unificado.</p>
+          <p><b>Plano provável:</b> Corporate.</p>
+        </div>
+      </div>
+
+      <h2>Objeções comuns (a endereçar na copy)</h2>
+      <ul>
+        <li>"Isso é permitido / é seguro?" → falar de <b>dados públicos</b> e uso responsável.</li>
+        <li>"Eu já vejo isso de graça no LinkedIn." → valor está em <b>histórico, consolidação e métricas</b>, não no acesso.</li>
+        <li>"Vou ter trabalho pra configurar." → <b>cola a URL e sincroniza</b>, pronto.</li>
+      </ul>
+    </section>
+
+    <!-- 02 POSITIONING -->
+    <section class="page" id="positioning">
+      <h1>02 · Posicionamento & Proposta de Valor</h1>
+
+      <h2>Statement de posicionamento</h2>
+      <div class="quote">
+        Para <b>quem precisa acompanhar pessoas e empresas no LinkedIn</b>, a <b>LIA</b> é o <b>painel de inteligência</b> que transforma a atividade pública do LinkedIn em dados organizados e analisáveis —
+        <div class="alt">diferente de rolar o feed manualmente, a LIA guarda o histórico, consolida tudo num só lugar e mostra o engajamento ao longo do tempo.</div>
+      </div>
+
+      <h2>Categoria</h2>
+      <p>LinkedIn intelligence / monitoramento e analytics de atividade no LinkedIn. Vizinhos: social listening, sales intelligence, creator analytics.</p>
+
+      <h2>Proposta de valor (núcleo)</h2>
+      <div class="card">
+        <p style="font-size:18px; margin-top:0"><b>Cole um perfil do LinkedIn e veja, num só lugar, tudo o que aquela pessoa ou empresa anda publicando — e o engajamento que isso gera.</b></p>
+      </div>
+
+      <h2>Diferenciais</h2>
+      <table>
+        <tr><th>Diferencial</th><th>Por que importa</th><th>Status</th></tr>
+        <tr><td>Sync automático de posts, reações, comentários e funcionários</td><td>Profundidade que o feed nativo não dá</td><td><span class="tag fact">Fato</span></td></tr>
+        <tr><td>Histórico e cadência ("posts por semana")</td><td>Vê tendência, não só o agora</td><td><span class="tag fact">Fato</span></td></tr>
+        <tr><td>Feed + timeline consolidados de todos os perfis</td><td>Um lugar em vez de N abas</td><td><span class="tag fact">Fato</span></td></tr>
+        <tr><td>Tags e filtros</td><td>Organiza dezenas de perfis</td><td><span class="tag fact">Fato</span></td></tr>
+        <tr><td>Workspace compartilhado + convites (Corporate)</td><td>Serve times/agências</td><td><span class="tag fact">Fato</span></td></tr>
+        <tr><td>Pagamento em PIX, em reais</td><td>Fricção zero para o mercado BR</td><td><span class="tag fact">Fato</span></td></tr>
+      </table>
+    </section>
+
+    <!-- 03 MESSAGING -->
+    <section class="page" id="messaging">
+      <h1>03 · Messaging House</h1>
+      <p class="lead">A fonte única de como falar da LIA. Reusar em landing, ads, e-mail e social.</p>
+
+      <h2>Headline principal (candidatas a teste)</h2>
+      <div class="grid cols-2">
+        <div class="quote">Toda a atividade do LinkedIn que importa, num só painel.</div>
+        <div class="quote">Pare de rolar o feed. Comece a analisar.</div>
+        <div class="quote">Monitore qualquer perfil ou empresa do LinkedIn — com histórico e métricas.</div>
+        <div class="quote">Inteligência de LinkedIn: cole o perfil, veja tudo.</div>
+      </div>
+
+      <h2>Pilares de mensagem</h2>
+      <div class="grid cols-3">
+        <div class="card"><h3 style="margin-top:0">Consolidação</h3><p>Pessoas, empresas, posts, reações e comentários num feed e numa timeline únicos.</p></div>
+        <div class="card"><h3 style="margin-top:0">Análise</h3><p>Engajamento e cadência ao longo do tempo — quem posta, quando e o que funciona.</p></div>
+        <div class="card"><h3 style="margin-top:0">Simplicidade</h3><p>Cola a URL, sincroniza, pronto. Sem planilha, sem extensão complicada.</p></div>
+      </div>
+
+      <h2>Benefícios &gt; Features</h2>
+      <table>
+        <tr><th>Feature (o quê)</th><th>Benefício (pra quê)</th></tr>
+        <tr><td>Sync de posts/reações/comentários</td><td>Você nunca perde um movimento relevante de quem você acompanha.</td></tr>
+        <tr><td>Gráfico de posts por semana</td><td>Entende o ritmo e os melhores temas — seus e dos concorrentes.</td></tr>
+        <tr><td>Feed e timeline unificados</td><td>Acompanha dezenas de perfis no tempo de um café.</td></tr>
+        <tr><td>Tags e filtros</td><td>Organiza por cliente, setor ou prioridade.</td></tr>
+        <tr><td>Workspace compartilhado</td><td>O time inteiro vê os mesmos dados, sem retrabalho.</td></tr>
+      </table>
+
+      <h2>Tom de voz</h2>
+      <div class="grid cols-2">
+        <div class="card"><h3 style="margin-top:0">É</h3><ul><li>Direto e prático</li><li>Confiante, orientado a dado</li><li>Profissional sem ser corporativês</li></ul></div>
+        <div class="card"><h3 style="margin-top:0">Não é</h3><ul><li>Sensacionalista / "hack"</li><li>Jargão de growth vazio</li><li>Promessa de "stalkear" alguém</li></ul></div>
+      </div>
+
+      <h2>CTAs</h2>
+      <div class="pill-row">
+        <span class="pill">Começar grátis</span>
+        <span class="pill">Cole seu primeiro perfil</span>
+        <span class="pill">Ver um perfil de exemplo</span>
+        <span class="pill">Testar sem cartão</span>
+      </div>
+    </section>
+
+    <!-- 04 LANDING -->
+    <section class="page" id="landing">
+      <h1>04 · Copy da Landing Page</h1>
+      <p class="lead">Rascunho de copy seção a seção, pronto para o design.</p>
+
+      <h2>Hero</h2>
+      <div class="card">
+        <p><b>H1:</b> Toda a atividade do LinkedIn que importa, num só painel.</p>
+        <p><b>Sub:</b> Cole o perfil ou a empresa que você quer acompanhar. A LIA busca posts, reações, comentários e funcionários — e mostra o engajamento com histórico e métricas.</p>
+        <p><b>CTA primário:</b> Começar grátis &nbsp;·&nbsp; <b>secundário:</b> Ver perfil de exemplo</p>
+        <p class="lead">Microcopy: Sem cartão. 1 perfil grátis para sempre.</p>
+      </div>
+
+      <h2>Como funciona (3 passos)</h2>
+      <div class="grid cols-3">
+        <div class="card"><h3 style="margin-top:0">1. Cole o perfil</h3><p>URL ou handle de qualquer pessoa ou empresa do LinkedIn.</p></div>
+        <div class="card"><h3 style="margin-top:0">2. Sincronize</h3><p>A LIA traz posts, reações, comentários e funcionários automaticamente.</p></div>
+        <div class="card"><h3 style="margin-top:0">3. Analise</h3><p>Veja cadência, engajamento e os conteúdos que mais performam.</p></div>
+      </div>
+
+      <h2>Blocos de feature</h2>
+      <ul>
+        <li><b>Feed consolidado</b> — todos os perfis que você acompanha num fluxo só, com filtros por empresa e tag.</li>
+        <li><b>Timeline cronológica</b> — a história completa da atividade, em ordem.</li>
+        <li><b>Análise por perfil</b> — abas de posts, reações, comentários e funcionários + gráfico de posts por semana e ranking de conteúdo mais engajado.</li>
+        <li><b>Tags &amp; organização</b> — agrupe perfis por cliente, setor ou prioridade.</li>
+        <li><b>Workspace de time</b> — convide membros e compartilhem os mesmos dados (Corporate).</li>
+      </ul>
+
+      <h2>Casos de uso (prova de relevância)</h2>
+      <div class="grid cols-2">
+        <div class="card"><h3 style="margin-top:0">Para vendas</h3><p>Saiba quando o lead postou algo relevante e puxe conversa com contexto.</p></div>
+        <div class="card"><h3 style="margin-top:0">Para concorrência</h3><p>Acompanhe a cadência e os temas dos seus concorrentes.</p></div>
+        <div class="card"><h3 style="margin-top:0">Para recrutamento</h3><p>Veja os funcionários de uma empresa e quem anda ativo.</p></div>
+        <div class="card"><h3 style="margin-top:0">Para agências</h3><p>Gerencie o LinkedIn de vários clientes num só workspace.</p></div>
+      </div>
+
+      <h2>Prova social</h2>
+      <div class="callout"><span class="tag hyp">Hipótese</span> &nbsp;Placeholder até existirem clientes reais. <b>Não inventar depoimentos.</b> Começar com números reais (ex: "X perfis monitorados") só quando forem verdadeiros.</div>
+
+      <h2>Pricing &amp; FAQ &amp; CTA final</h2>
+      <p>Repetir os 4 planos (ver aba Pricing) + FAQ de objeções (ver ICP) + CTA: <b>"Comece com 1 perfil grátis."</b></p>
+    </section>
+
+    <!-- 05 PRICING -->
+    <section class="page" id="pricing">
+      <h1>05 · Pricing</h1>
+      <p class="lead"><span class="tag fact">Fato</span> Planos e limites conforme o produto.</p>
+
+      <div class="price-grid">
+        <div class="plan">
+          <div class="name">Free</div>
+          <div class="price">R$ 0</div>
+          <ul><li>1 perfil</li><li>Syncs ilimitados</li><li>Analytics completo</li></ul>
+        </div>
+        <div class="plan">
+          <div class="name">Starter</div>
+          <div class="price">R$ 29<small>/mês</small></div>
+          <ul><li>5 perfis</li><li>Syncs ilimitados</li><li>Analytics + filtros</li><li>30 dias por PIX</li></ul>
+        </div>
+        <div class="plan featured">
+          <div class="name">Pro · popular</div>
+          <div class="price">R$ 90<small>/mês</small></div>
+          <ul><li>20 perfis</li><li>Syncs ilimitados</li><li>Analytics + filtros</li><li>Suporte prioritário</li></ul>
+        </div>
+        <div class="plan">
+          <div class="name">Corporate</div>
+          <div class="price">R$ 299<small>/mês</small></div>
+          <ul><li>100 perfis</li><li>Workspace + convites</li><li>Syncs ilimitados</li><li>Suporte prioritário</li></ul>
+        </div>
+      </div>
+
+      <h2>Racional dos planos</h2>
+      <ul>
+        <li><b>Free</b> = isca de ativação. 1 perfil é o suficiente para o "aha moment" (ver o primeiro sync).</li>
+        <li><b>Starter → Pro</b> = a alavanca é <b>número de perfis</b> (5 → 20). Quem acompanha mais gente sobe naturalmente.</li>
+        <li><b>Corporate</b> = muda a natureza: <b>time</b> (workspace compartilhado + convites), não só volume.</li>
+      </ul>
+
+      <h2>FAQ de cobrança</h2>
+      <ul>
+        <li><b>Como pago?</b> Via PIX, em reais. Cada pagamento dá 30 dias de acesso.</li>
+        <li><b>Preciso de cartão?</b> Não. O plano Free não exige pagamento.</li>
+        <li><b>Posso trocar de plano?</b> Sim, conforme o número de perfis que precisa.</li>
+      </ul>
+      <div class="callout"><span class="tag hyp">Hipótese</span> &nbsp;Elasticidade de preço e o "popular" no Pro são suposições. Testar com dados de conversão reais.</div>
+    </section>
+
+    <!-- 06 COMPETITORS -->
+    <section class="page" id="competitors">
+      <h1>06 · Concorrentes</h1>
+      <div class="callout"><span class="tag hyp">Hipótese — a preencher</span><br />
+        Esta seção está <b>intencionalmente vazia de afirmações</b>. Não listei preços nem features de concorrentes porque <b>não tenho dados verificados</b>. Inventar isso levaria a decisões erradas de posicionamento.
+      </div>
+
+      <h2>Como preencher (pesquisa a fazer)</h2>
+      <ol>
+        <li>Listar players reais de analytics/monitoramento de LinkedIn que você encontrar.</li>
+        <li>Para cada um, registrar <b>com link/fonte</b>: preço, o que faz, idioma, forma de pagamento, público.</li>
+        <li>Marcar onde a LIA <b>ganha</b> (ex: PIX/BR, profundidade de sync) e onde <b>perde</b>.</li>
+      </ol>
+
+      <h2>Template de comparação</h2>
+      <table>
+        <tr><th>Concorrente</th><th>Preço</th><th>Foco</th><th>BR/PIX?</th><th>Onde a LIA difere</th><th>Fonte</th></tr>
+        <tr><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      </table>
+    </section>
+
+    <!-- 07 CHANNELS -->
+    <section class="page" id="channels">
+      <h1>07 · Canais & Conteúdo</h1>
+      <p class="lead">Onde adquirir e como nutrir. Priorize 1–2 canais antes de pulverizar.</p>
+      <div class="callout"><span class="tag hyp">Hipótese</span> &nbsp;Priorização abaixo é um ponto de partida; ajustar conforme CAC real por canal.</div>
+
+      <h2>Canais (ordem sugerida)</h2>
+      <div class="grid cols-2">
+        <div class="card"><h3 style="margin-top:0">1. LinkedIn orgânico</h3><p>Canal-mãe: o produto é sobre LinkedIn. Construir audiência postando análises feitas <b>com a própria LIA</b> (dogfooding visível).</p></div>
+        <div class="card"><h3 style="margin-top:0">2. SEO / conteúdo</h3><p>Termos de intenção: "como monitorar concorrente no LinkedIn", "analytics de perfil LinkedIn", "ver histórico de posts".</p></div>
+        <div class="card"><h3 style="margin-top:0">3. Indicação / loop</h3><p>Compartilhar um "relatório de perfil" gera curiosidade → quem vê quer a ferramenta.</p></div>
+        <div class="card"><h3 style="margin-top:0">4. Parcerias / comunidades</h3><p>Comunidades de vendas, recruiting e creators no BR.</p></div>
+      </div>
+
+      <h2>Pilares de conteúdo</h2>
+      <div class="pill-row">
+        <span class="pill">Análises de quem posta bem no LinkedIn</span>
+        <span class="pill">Benchmarks de cadência por setor</span>
+        <span class="pill">Táticas de social selling com timing</span>
+        <span class="pill">Bastidores do produto</span>
+      </div>
+
+      <h2>Ativos a produzir</h2>
+      <ul>
+        <li><b>Onboarding por e-mail:</b> boas-vindas → leve ao primeiro sync → mostre o que a análise revela → convite para upgrade.</li>
+        <li><b>Kit de lançamento:</b> post de anúncio, thread de "como construí", demo em vídeo de 60s.</li>
+        <li><b>Lead magnet:</b> relatório gratuito de 1 perfil como amostra do valor.</li>
+      </ul>
+    </section>
+
+    <!-- 08 METRICS -->
+    <section class="page" id="metrics">
+      <h1>08 · Funil & Métricas</h1>
+      <div class="callout"><span class="tag hyp">Hipótese</span> &nbsp;Métricas-alvo abaixo são <b>placeholders</b>. Definir baselines com dados reais de uso antes de cobrar metas.</div>
+
+      <h2>North Star (proposta)</h2>
+      <div class="card"><p style="margin:0; font-size:18px"><b>Perfis sincronizados por usuário ativo / semana</b> — captura valor entregue (uso real do core) melhor que só "logins".</p></div>
+
+      <h2>Funil</h2>
+      <table>
+        <tr><th>Etapa</th><th>Evento</th><th>Métrica</th></tr>
+        <tr><td>Aquisição</td><td>Visita à landing</td><td>Visitantes únicos</td></tr>
+        <tr><td>Ativação</td><td><b>1º perfil sincronizado</b> (aha)</td><td>% signups que sincronizam</td></tr>
+        <tr><td>Receita</td><td>1º pagamento PIX</td><td>Conversão Free → pago</td></tr>
+        <tr><td>Retenção</td><td>Sync recorrente</td><td>Usuários ativos semanais</td></tr>
+        <tr><td>Indicação</td><td>Convite / compartilhamento</td><td>Coeficiente viral</td></tr>
+      </table>
+
+      <h2>KPIs principais</h2>
+      <div class="kpi">
+        <div class="item"><b>Ativação</b><div class="v">% que faz 1º sync</div></div>
+        <div class="item"><b>Conversão</b><div class="v">Free → pago</div></div>
+        <div class="item"><b>Retenção</b><div class="v">WAU / churn mensal</div></div>
+        <div class="item"><b>CAC</b><div class="v">por canal</div></div>
+        <div class="item"><b>LTV</b><div class="v">por plano</div></div>
+        <div class="item"><b>Expansão</b><div class="v">upgrades de plano</div></div>
+      </div>
+    </section>
+
+    <!-- 09 ROADMAP -->
+    <section class="page" id="roadmap">
+      <h1>09 · Roadmap de Marketing</h1>
+      <p class="lead">Sequência sugerida. Foco em fundação antes de gastar com mídia.</p>
+
+      <h2>Fase 1 — Fundação (semanas 1–2)</h2>
+      <ul>
+        <li>Fechar ICP/Personas com 5–10 entrevistas reais.</li>
+        <li>Validar headline e proposta de valor.</li>
+        <li>Publicar landing com a copy desta doc.</li>
+      </ul>
+
+      <h2>Fase 2 — Tração inicial (semanas 3–6)</h2>
+      <ul>
+        <li>LinkedIn orgânico: 3 posts/semana com análises feitas na LIA.</li>
+        <li>Instrumentar o funil (ativação = 1º sync).</li>
+        <li>Onboarding por e-mail no ar.</li>
+        <li>Preencher a aba <b>Concorrentes</b> com pesquisa real.</li>
+      </ul>
+
+      <h2>Fase 3 — Escala (semanas 7+)</h2>
+      <ul>
+        <li>Dobrar no canal com melhor CAC.</li>
+        <li>Lançamento público (Product Hunt / comunidades).</li>
+        <li>Loop de indicação / compartilhamento de relatório.</li>
+        <li>Testar preço e empacotamento com dados.</li>
+      </ul>
+
+      <footer>
+        LIA · Plano de Marketing — documento de trabalho. Itens marcados como
+        <b style="color:var(--warn)">Hipótese</b> não são achados verificados; validar antes de decidir.
+      </footer>
+    </section>
+  </main>
+</div>
+
+<script>
+  const buttons = document.querySelectorAll('#nav button');
+  const pages = document.querySelectorAll('.page');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.page;
+      buttons.forEach(b => b.classList.toggle('active', b === btn));
+      pages.forEach(p => p.classList.toggle('active', p.id === id));
+      document.querySelector('main').scrollTo({ top: 0 });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>

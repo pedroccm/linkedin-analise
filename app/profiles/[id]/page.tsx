@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { addProfile } from "../../actions";
 import { DeleteProfileButton } from "./delete-profile-button";
 import { SyncButton } from "./sync-button";
+import { MonitorToggle } from "./monitor-toggle";
 import { SortTabs, type SortKey } from "./sort-tabs";
 import { PostItem } from "./post-item";
 import { ReactionItem } from "./reaction-item";
@@ -372,6 +373,10 @@ export default async function ProfilePage({
               />
             </div>
             <div className="flex gap-2 shrink-0">
+              <MonitorToggle
+                profileId={profile.id}
+                enabled={!!profile.monitor_enabled}
+              />
               <SyncButton
                 endpoint={`/api/profiles/${profile.id}/sync`}
                 label={isCompany ? t.syncCompanyPosts : t.syncDetailsPosts}
