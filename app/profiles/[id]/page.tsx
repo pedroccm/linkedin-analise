@@ -20,6 +20,7 @@ import { StatsCard } from "./stats-card";
 import { TopEngagedAuthors } from "./top-engaged";
 import { PostsFilter } from "./posts-filter";
 import { PostsPanel } from "./posts-panel";
+import { PersonTimeline } from "./person-timeline";
 import { ProfileTags } from "./profile-tags";
 import { AutoSync } from "./auto-sync";
 import { getServerI18n } from "@/lib/i18n/server";
@@ -434,7 +435,6 @@ export default async function ProfilePage({
           profileId={profile.id}
           range={range}
           query={query}
-          t={t}
         />
       )}
       {tab === "stats" && !isCompany && (
@@ -515,17 +515,16 @@ async function StatsSection({
   );
 }
 
-// Person Timeline tab: this profile's own likes + comments, merged chronologically.
+// Person Timeline tab: this profile's posts + likes + comments, merged and
+// grouped by day. Kind filtering happens client-side in <PersonTimeline>.
 async function PersonTimelineSection({
   profileId,
   range,
   query,
-  t,
 }: {
   profileId: string;
   range: string;
   query: string;
-  t: ProfileT;
 }) {
   const rows = await fetchTimeline({
     actorIds: [profileId],
@@ -535,26 +534,7 @@ async function PersonTimelineSection({
     includePosts: true,
   });
 
-  return (
-    <div className="space-y-3">
-      <p className="text-sm text-[var(--color-text-muted)]">
-        {t.timelinePersonDesc}
-      </p>
-      <p className="text-xs text-[var(--color-text-muted)]">
-        {rows.length} {t.tabTimeline.toLowerCase()}
-      </p>
-      {rows.length === 0 && (
-        <p className="text-[var(--color-text-muted)] text-sm">
-          {t.timelinePersonEmpty}
-        </p>
-      )}
-      <ul className="grid gap-3">
-        {rows.map((row) => (
-          <TimelineItem key={row.key} row={row} />
-        ))}
-      </ul>
-    </div>
-  );
+  return <PersonTimeline rows={rows} />;
 }
 
 async function ReactionsSection({ profileId, t }: { profileId: string; t: ProfileT }) {
