@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useDict } from "@/lib/i18n/client";
+import { useDict, useLocale } from "@/lib/i18n/client";
 import { fmtDateTime } from "@/lib/format";
 
 type Post = {
@@ -20,6 +20,7 @@ const COLLAPSED_CHAR_LIMIT = 240;
 export function PostItem({ post }: { post: Post }) {
   const [expanded, setExpanded] = useState(false);
   const dict = useDict();
+  const locale = useLocale();
   const c = dict.common;
   const p = dict.profile;
 
@@ -33,9 +34,8 @@ export function PostItem({ post }: { post: Post }) {
       <div className="flex items-center justify-between gap-4 text-xs text-[var(--color-text-muted)] mb-2">
         <div>
           {post.posted_at
-            ? fmtDateTime(post.posted_at)
+            ? fmtDateTime(post.posted_at, locale)
             : p.unknownDate}
-          {post.post_type && <span className="ml-2">· {post.post_type}</span>}
         </div>
         {post.post_url && (
           <a href={post.post_url} target="_blank" rel="noreferrer">

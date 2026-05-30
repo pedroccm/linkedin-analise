@@ -142,6 +142,7 @@
       <button data-page="icp"><span class="num">01</span> ICP & Personas</button>
       <button data-page="positioning"><span class="num">02</span> Posicionamento & Valor</button>
       <button data-page="messaging"><span class="num">03</span> Messaging House</button>
+      <button data-page="angulos"><span class="num">★</span> Banco de Ângulos</button>
 
       <div class="group">Site & Conversão</div>
       <button data-page="landing"><span class="num">04</span> Copy da Landing</button>
@@ -319,6 +320,162 @@
         <span class="pill">Ver um perfil de exemplo</span>
         <span class="pill">Testar sem cartão</span>
       </div>
+    </section>
+
+    <!-- ★ BANCO DE ÂNGULOS -->
+    <section class="page" id="angulos">
+      <h1>★ Banco de Ângulos · Brainstorming</h1>
+      <p class="lead">Ângulos de mensagem do fundador. Em cada um: o <b>texto original</b> (na íntegra, não editado) e, abaixo, o <b>destrinchado</b> — persona, ângulo, como construir e o que validar.</p>
+      <div class="callout"><span class="tag fact">Original</span> = palavras do fundador, intocadas. &nbsp;<span class="tag hyp">Brainstorm</span> = expansão/hipótese minha, a validar — não é achado.</div>
+
+      <!-- ========== ÂNGULO A ========== -->
+      <h2>Ângulo A — Inteligência de seguidores + digest diário por e-mail</h2>
+      <div class="card">
+        <div class="tag fact">Original</div>
+        <p style="margin-top:8px">"Como você sabe o que os seus seguidores postam? O que eles colocam? O que eles curtem? Onde eles interagem? E o que eles postam? Sem seguir eles, sem interagir com eles, ter informação em tempo real num painel e, se preferir, um resumo diário no seu e-mail."</p>
+        <p style="margin-bottom:0"><b>Tagline:</b> "Uma newsletter as a service com o que você pedir no seu LinkedIn."</p>
+      </div>
+
+      <div class="tag hyp">Brainstorm</div>
+      <div class="grid cols-2" style="margin-top:10px">
+        <div class="card">
+          <h3 style="margin-top:0">🎯 Persona</h3>
+          <ul>
+            <li>Criador / personal brander que posta no LinkedIn</li>
+            <li>Founder ou exec que quer ler a rede sem viver no feed</li>
+            <li>Quem acompanha seguidores/rede sem querer seguir nem interagir</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">💡 Dor</h3>
+          <ul>
+            <li>O LinkedIn não te entrega o que a sua rede anda fazendo</li>
+            <li>Não dá tempo de rolar feed o dia todo</li>
+            <li>Quer estar informado de forma passiva, "no automático"</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">🗣️ Ângulo de mensagem</h3>
+          <ul>
+            <li>"Sua newsletter pessoal do LinkedIn — você escolhe quem, a LIA resume."</li>
+            <li>"Saiba o que sua rede faz sem abrir o LinkedIn."</li>
+            <li>"O LinkedIn no seu e-mail, todo dia de manhã."</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">🔧 Como construir</h3>
+          <ul>
+            <li><b>Digest por e-mail</b>: agendador (cron) + template + provedor de envio</li>
+            <li>Geração do resumo (regra simples ou IA) a partir do que já é sincronizado</li>
+            <li>Config: quem monitorar + frequência (diário/semanal) + horário</li>
+            <li>Painel em tempo real já é parcialmente o produto atual</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout"><b>Validar:</b> as pessoas <i>abrem</i> o digest (open rate)? Preferem e-mail ou painel? O resumo automático é bom o suficiente sem curadoria?</div>
+
+      <!-- ========== ÂNGULO B ========== -->
+      <h2>Ângulo B — Relacionamento de vendas sem importunar</h2>
+      <div class="card">
+        <div class="tag fact">Original</div>
+        <p style="margin-top:8px">"Como acompanhar as pessoas que você quer vender sem ficar enchendo o saco delas, criando um relacionamento?"</p>
+        <ul style="margin-bottom:0">
+          <li>Curta.</li>
+          <li>Comenta.</li>
+          <li>Vê onde elas têm interesse.</li>
+          <li>Conheça o seu cliente.</li>
+        </ul>
+      </div>
+
+      <div class="tag hyp">Brainstorm</div>
+      <div class="grid cols-2" style="margin-top:10px">
+        <div class="card">
+          <h3 style="margin-top:0">🎯 Persona</h3>
+          <ul>
+            <li>Social seller / SDR / BDR</li>
+            <li>Account Executive trabalhando contas-alvo</li>
+            <li>Founder-led sales (vende no próprio nome)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">💡 Dor</h3>
+          <ul>
+            <li>Quer criar relação antes de vender, sem ser invasivo</li>
+            <li>Não sabe onde/como engajar de forma genuína</li>
+            <li>Mensagem fria queima o lead</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">🗣️ Ângulo de mensagem</h3>
+          <ul>
+            <li>"Aqueça o lead antes de vender — sem encher o saco."</li>
+            <li>"Relacionamento, não spam."</li>
+            <li>"Conheça seu cliente antes do primeiro 'oi'."</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">🔧 Como construir</h3>
+          <ul>
+            <li>Além de monitorar: <b>sugerir onde engajar</b> ("posts do lead pra curtir/comentar hoje")</li>
+            <li>Resumo de <b>interesses</b> do lead (temas que ele posta/curte)</li>
+            <li>Feed de prospecção já é a base — falta a camada de "ação sugerida"</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout"><b>Validar:</b> vendedor quer <i>sugestão de engajamento</i> ou só o feed cru? Isso conecta com o Ângulo B já testado nas landings de vendas — comparar performance.</div>
+
+      <!-- ========== ÂNGULO C ========== -->
+      <h2>Ângulo C — Empresas: monitorar e engajar os próprios funcionários (employee advocacy)</h2>
+      <div class="card">
+        <div class="tag fact">Original</div>
+        <p style="margin-top:8px; margin-bottom:0">"Você é um escritório de advocacia? O que os seus clientes postam? O que os advogados do seu escritório postam? Quer monitorar o que os seus funcionários estão postando no LinkedIn? Engaje com eles, faça eles crescerem e divulgarem a sua marca."</p>
+      </div>
+
+      <div class="tag hyp">Brainstorm</div>
+      <div class="grid cols-2" style="margin-top:10px">
+        <div class="card">
+          <h3 style="margin-top:0">🎯 Persona / comprador</h3>
+          <ul>
+            <li>Escritórios: advocacia, contabilidade, consultoria</li>
+            <li>Comprador: sócio, marketing, RH ou employer branding</li>
+            <li>Gestor que quer o time postando e amplificando a marca</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">💡 Dor</h3>
+          <ul>
+            <li>Querem que funcionários postem, mas não sabem quem posta</li>
+            <li>Conteúdo do time é alcance de marca desperdiçado</li>
+            <li>Sem visão de clientes + funcionários no mesmo lugar</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">🗣️ Ângulo de mensagem</h3>
+          <ul>
+            <li>"Transforme seu time em embaixadores da marca no LinkedIn."</li>
+            <li>"Seu escritório posta — você sabe o quê?"</li>
+            <li>Landing por vertical: "Para escritórios de advocacia."</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">🔧 Como construir</h3>
+          <ul>
+            <li>Apoia no <b>plano Corporate</b> (workspace + membros já existe)</li>
+            <li>Monitorar perfis de funcionários + ranking de quem posta/engaja</li>
+            <li>Visão dupla: clientes do escritório + time do escritório</li>
+            <li>Landing/vertical dedicada por segmento</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout"><b>Validar:</b> empresas <i>pagam</i> por isso e quem é o comprador (sócio? marketing? RH?). Ticket é maior (caminho Corporate) — vale outbound, não só ads.</div>
+
+      <h2>Onde cada ângulo se encaixa</h2>
+      <table>
+        <tr><th>Ângulo</th><th>Público</th><th>Exige construir?</th><th>Melhor canal</th></tr>
+        <tr><td>A · Digest por e-mail</td><td>Criadores / founders</td><td>Sim — feature de e-mail</td><td>LinkedIn orgânico + e-mail</td></tr>
+        <tr><td>B · Relacionamento de vendas</td><td>SDR / AE / founder sales</td><td>Parcial — já testável</td><td>Meta + LinkedIn Ads</td></tr>
+        <tr><td>C · Employee advocacy</td><td>Escritórios / empresas</td><td>Pouco — usa Corporate</td><td>Outbound + LinkedIn Ads</td></tr>
+      </table>
     </section>
 
     <!-- 04 LANDING -->

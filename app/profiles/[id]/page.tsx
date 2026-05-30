@@ -6,21 +6,20 @@ import { addProfile } from "../../actions";
 import { DeleteProfileButton } from "./delete-profile-button";
 import { SyncButton } from "./sync-button";
 import { MonitorToggle } from "./monitor-toggle";
-import { SortTabs, type SortKey } from "./sort-tabs";
-import { PostItem } from "./post-item";
+import { type SortKey } from "./sort-tabs";
 import { ReactionItem } from "./reaction-item";
 import { CommentItem } from "./comment-item";
 import { EmployeeItem } from "./employee-item";
-import { FeedPostItem } from "./feed-post-item";
-import { TimelineItem } from "@/app/timeline/timeline-item";
+import { ActivityTimeline } from "@/app/timeline/activity-timeline";
+import { FeedList } from "@/app/feed/feed-list";
+import { SortSelect } from "@/app/feed/sort-pills";
+import { FilterBar } from "@/app/feed/filter-bar";
 import { fetchTimeline } from "@/lib/timeline";
 import { Tabs, type Tab } from "./tabs";
 import { BackgroundSync } from "./background-sync";
 import { StatsCard } from "./stats-card";
 import { TopEngagedAuthors } from "./top-engaged";
-import { PostsFilter } from "./posts-filter";
 import { PostsPanel } from "./posts-panel";
-import { PersonTimeline } from "./person-timeline";
 import { ProfileTags } from "./profile-tags";
 import { AutoSync } from "./auto-sync";
 import { getServerI18n } from "@/lib/i18n/server";
@@ -30,14 +29,6 @@ import { SubmitButton } from "../../submit-button";
 export const dynamic = "force-dynamic";
 
 type ProfileT = Dict["profile"];
-type CommonT = Dict["common"];
-
-const SORT_CONFIG: Record<SortKey, { column: string; ascending: boolean }> = {
-  recent: { column: "posted_at", ascending: false },
-  likes: { column: "reactions_count", ascending: false },
-  comments: { column: "comments_count", ascending: false },
-  reposts: { column: "reposts_count", ascending: false },
-};
 
 function parseSort(raw: string | string[] | undefined): SortKey {
   const v = Array.isArray(raw) ? raw[0] : raw;
@@ -59,19 +50,6 @@ function parseTab(
   if (v === "posts" || v === "reactions" || v === "comments" || v === "stats")
     return v;
   return "timeline"; // default for people
-}
-
-function rangeStartISO(range: string): string | null {
-  const now = new Date();
-  const d = new Date(now);
-  switch (range) {
-    case "30d": d.setDate(now.getDate() - 30); break;
-    case "90d": d.setDate(now.getDate() - 90); break;
-    case "6m":  d.setMonth(now.getMonth() - 6); break;
-    case "1y":  d.setFullYear(now.getFullYear() - 1); break;
-    default: return null;
-  }
-  return d.toISOString();
 }
 
 function formatEmployeeRange(raw: unknown): string | null {
@@ -130,7 +108,6 @@ export default async function ProfilePage({
 }) {
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const sort = parseSort(sp.sort);
-  const range = typeof sp.range === "string" ? sp.range : "";
   const query = typeof sp.q === "string" ? sp.q : "";
   const autosync = sp.autosync === "1";
 
@@ -430,11 +407,7 @@ export default async function ProfilePage({
         <CommentsSection profileId={profile.id} t={t} />
       )}
       {tab === "timeline" && !isCompany && (
-        <PersonTimelineSection
-          profileId={profile.id}
-          range={range}
-          query={query}
-        />
+        <PersonTimelineSection profileId={profile.id} />
       )}
       {tab === "stats" && !isCompany && (
         <StatsSection profileId={profile.id} t={t} />
@@ -443,17 +416,13 @@ export default async function ProfilePage({
         <FeedSection
           companyId={profile.id}
           sort={sort}
-          range={range}
           query={query}
           t={t}
-          common={common}
         />
       )}
       {tab === "timeline" && isCompany && (
         <CompanyTimelineSection
           personIds={companyLinkedPersonIds}
-          range={range}
-          query={query}
           t={t}
         />
       )}
@@ -515,25 +484,15 @@ async function StatsSection({
 }
 
 // Person Timeline tab: this profile's posts + likes + comments, merged and
-// grouped by day. Kind filtering happens client-side in <PersonTimeline>.
-async function PersonTimelineSection({
-  profileId,
-  range,
-  query,
-}: {
-  profileId: string;
-  range: string;
-  query: string;
-}) {
+// grouped by day in <ActivityTimeline>.
+async function PersonTimelineSection({ profileId }: { profileId: string }) {
   const rows = await fetchTimeline({
     actorIds: [profileId],
-    since: rangeStartISO(range),
-    query,
     limit: 200,
     includePosts: true,
   });
 
-  return <PersonTimeline rows={rows} />;
+  return <ActivityTimeline rows={rows} />;
 }
 
 async function ReactionsSection({ profileId, t }: { profileId: string; t: ProfileT }) {
@@ -601,17 +560,13 @@ async function CommentsSection({ profileId, t }: { profileId: string; t: Profile
 async function FeedSection({
   companyId,
   sort,
-  range,
   query,
   t,
-  common,
 }: {
   companyId: string;
   sort: SortKey;
-  range: string;
   query: string;
   t: ProfileT;
-  common: CommonT;
 }) {
   const supabase = await createClient();
 
@@ -622,8 +577,8 @@ async function FeedSection({
     .eq("company_profile_id", companyId);
   const authorIds = [companyId, ...(linkedPeople?.map((p) => p.id) ?? [])];
 
-  // 2) Fetch posts from this company + linked people, joined with author info
-  const { column, ascending } = SORT_CONFIG[sort];
+  // 2) Fetch posts from this company + linked people, joined with author info.
+  // Always newest-first; FeedList groups by day and sorts within each day.
   let postsQuery = supabase
     .from("linkedin_posts")
     .select(
@@ -632,12 +587,10 @@ async function FeedSection({
     )
     .in("profile_id", authorIds);
 
-  const since = rangeStartISO(range);
-  if (since) postsQuery = postsQuery.gte("posted_at", since);
   if (query.trim()) postsQuery = postsQuery.ilike("text_content", `%${query.trim()}%`);
 
-  const { data: rawPosts } = await postsQuery.order(column, {
-    ascending,
+  const { data: rawPosts } = await postsQuery.order("posted_at", {
+    ascending: false,
     nullsFirst: false,
   });
 
@@ -672,42 +625,30 @@ async function FeedSection({
       <p className="text-sm text-[var(--color-text-muted)]">
         {t.feedDesc} <span className="text-white">{trackedCount}</span> {t.feedPeople}
       </p>
-      <div className="flex flex-wrap gap-3 items-center justify-between">
-        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
-          {t.tabFeed}
-        </h3>
-        <SortTabs profileId={companyId} active={sort} range={range} query={query} tab="feed" common={common} />
+      <div className="flex flex-wrap items-center gap-2">
+        <FilterBar
+          basePath={`/profiles/${companyId}`}
+          currentQuery={query}
+          showRange={false}
+        />
+        <SortSelect basePath={`/profiles/${companyId}`} currentSort={sort} />
       </div>
-      <PostsFilter
-        profileId={companyId}
-        currentSort={sort}
-        currentRange={range}
-        currentQuery={query}
-      />
       <p className="text-xs text-[var(--color-text-muted)]">
         {posts.length} {t.postsMatch}
       </p>
       {posts.length === 0 && (
         <p className="text-[var(--color-text-muted)] text-sm">{t.feedEmpty}</p>
       )}
-      <ul className="grid gap-3">
-        {posts.map((p) => (
-          <FeedPostItem key={p.id} post={p} />
-        ))}
-      </ul>
+      <FeedList posts={posts} sort={sort} />
     </div>
   );
 }
 
 async function CompanyTimelineSection({
   personIds,
-  range,
-  query,
   t,
 }: {
   personIds: string[];
-  range: string;
-  query: string;
   t: ProfileT;
 }) {
   if (personIds.length === 0) {
@@ -718,12 +659,7 @@ async function CompanyTimelineSection({
     );
   }
 
-  const rows = await fetchTimeline({
-    actorIds: personIds,
-    since: rangeStartISO(range),
-    query,
-    limit: 200,
-  });
+  const rows = await fetchTimeline({ actorIds: personIds, limit: 200 });
 
   return (
     <div className="space-y-3">
@@ -731,17 +667,7 @@ async function CompanyTimelineSection({
         {t.timelineDesc} <span className="text-white">{personIds.length}</span>{" "}
         {t.timelinePeople}
       </p>
-      <p className="text-xs text-[var(--color-text-muted)]">
-        {rows.length} {t.tabTimeline.toLowerCase()}
-      </p>
-      {rows.length === 0 && (
-        <p className="text-[var(--color-text-muted)] text-sm">{t.timelineEmpty}</p>
-      )}
-      <ul className="grid gap-3">
-        {rows.map((row) => (
-          <TimelineItem key={row.key} row={row} />
-        ))}
-      </ul>
+      <ActivityTimeline rows={rows} showActor />
     </div>
   );
 }

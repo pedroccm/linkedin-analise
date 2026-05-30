@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useDict } from "@/lib/i18n/client";
+import { useDict, useLocale } from "@/lib/i18n/client";
 import { fmtDateTime, fmtTime } from "@/lib/format";
 
 type Author = {
@@ -36,6 +36,7 @@ export function FeedPostItem({
 }) {
   const [expanded, setExpanded] = useState(false);
   const dict = useDict();
+  const locale = useLocale();
   const c = dict.common;
   const p = dict.profile;
 
@@ -84,7 +85,9 @@ export function FeedPostItem({
               </span>
               {post.posted_at && (
                 <span>
-                  {timeOnly ? fmtTime(post.posted_at) : fmtDateTime(post.posted_at)}
+                  {timeOnly
+                    ? fmtTime(post.posted_at, locale)
+                    : fmtDateTime(post.posted_at, locale)}
                 </span>
               )}
             </div>

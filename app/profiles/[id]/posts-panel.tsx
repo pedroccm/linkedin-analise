@@ -17,37 +17,18 @@ type Post = {
 
 type SortKey = "recent" | "likes" | "comments" | "reposts";
 
-function rangeSinceMs(range: string): number | null {
-  const now = Date.now();
-  const DAY = 24 * 60 * 60 * 1000;
-  switch (range) {
-    case "30d": return now - 30 * DAY;
-    case "90d": return now - 90 * DAY;
-    case "6m": return now - 182 * DAY;
-    case "1y": return now - 365 * DAY;
-    default: return null;
-  }
-}
-
-// Client-side filtering: all posts are already loaded, so sort / date range /
-// search apply instantly with no server round-trip and no scroll jump.
+// Client-side filtering: all posts are already loaded, so sort / search apply
+// instantly with no server round-trip and no scroll jump.
 export function PostsPanel({ posts }: { posts: Post[] }) {
   const dict = useDict();
   const c = dict.common;
   const p = dict.profile;
 
   const [sort, setSort] = useState<SortKey>("recent");
-  const [range, setRange] = useState("");
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
     let arr = posts;
-    const since = rangeSinceMs(range);
-    if (since != null) {
-      arr = arr.filter(
-        (x) => x.posted_at && new Date(x.posted_at).getTime() >= since
-      );
-    }
     const qq = query.trim().toLowerCase();
     if (qq) {
       arr = arr.filter((x) => (x.text_content ?? "").toLowerCase().includes(qq));
@@ -69,7 +50,7 @@ export function PostsPanel({ posts }: { posts: Post[] }) {
       }
     });
     return sorted;
-  }, [posts, sort, range, query]);
+  }, [posts, sort, query]);
 
   const SORTS: Array<{ key: SortKey; label: string }> = [
     { key: "recent", label: c.sortRecent },
@@ -77,62 +58,28 @@ export function PostsPanel({ posts }: { posts: Post[] }) {
     { key: "comments", label: c.sortComments },
     { key: "reposts", label: c.sortReposts },
   ];
-  const RANGES: Array<{ key: string; label: string }> = [
-    { key: "", label: c.allTime },
-    { key: "30d", label: c.d30 },
-    { key: "90d", label: c.d90 },
-    { key: "6m", label: c.m6 },
-    { key: "1y", label: c.y1 },
-  ];
-
-  const pill = (active: boolean) =>
-    "text-xs px-3 py-1.5 rounded-full border transition-colors " +
-    (active
-      ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white"
-      : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-white hover:border-[var(--color-accent-2)]");
 
   return (
     <section className="space-y-3">
-      <div className="flex flex-wrap gap-3 items-center justify-between">
-        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
-          {p.allPosts}
-        </h3>
-        <div className="flex gap-1 flex-wrap">
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={c.searchPlaceholder}
+          className="flex-1 min-w-[180px] bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm outline-none focus:border-[var(--color-accent-2)]"
+        />
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as SortKey)}
+          className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--color-accent-2)]"
+        >
           {SORTS.map((o) => (
-            <button
-              key={o.key}
-              type="button"
-              onClick={() => setSort(o.key)}
-              className={pill(o.key === sort)}
-            >
+            <option key={o.key} value={o.key}>
               {o.label}
-            </button>
+            </option>
           ))}
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="flex-1 min-w-[200px]">
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={c.searchPlaceholder}
-            className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm outline-none focus:border-[var(--color-accent-2)]"
-          />
-        </div>
-        <div className="flex gap-1 flex-wrap">
-          {RANGES.map((d) => (
-            <button
-              key={d.key || "all"}
-              type="button"
-              onClick={() => setRange(d.key)}
-              className={pill(d.key === range)}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
+        </select>
       </div>
 
       <p className="text-xs text-[var(--color-text-muted)]">

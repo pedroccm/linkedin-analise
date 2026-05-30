@@ -8,7 +8,7 @@ export const dictionaries = {
     nav: {
       profiles: "Perfis",
       feed: "Feed",
-      timeline: "Atividade",
+      timeline: "Timeline",
       admin: "Admin",
       signIn: "Entrar",
       signOut: "Sair",
@@ -201,7 +201,7 @@ export const dictionaries = {
     },
     feed: {
       title: "Feed",
-      subtitle: "Todos os posts dos perfis que você acompanha. Filtre por empresa abaixo.",
+      subtitle: "Todos os posts dos perfis que você acompanha.",
       company: "Empresa",
       allCompanies: "Todas as empresas",
       tag: "Tag",
@@ -210,9 +210,9 @@ export const dictionaries = {
       empty: "Nenhum post ainda. Acompanhe perfis ou atualize os existentes.",
     },
     timeline: {
-      title: "Atividade",
+      title: "Timeline",
       subtitle:
-        "Likes e comments das pessoas que você acompanha. Filtre por empresa abaixo.",
+        "Likes e comments das pessoas que você acompanha.",
       activities: "atividades",
       empty: "Nenhuma atividade ainda. Atualize likes e comments das pessoas que você acompanha.",
       liked: "curtiu",
@@ -524,7 +524,7 @@ export const dictionaries = {
     },
     feed: {
       title: "Feed",
-      subtitle: "All posts from the profiles you track. Filter by company below.",
+      subtitle: "All posts from the profiles you track.",
       company: "Company",
       allCompanies: "All companies",
       tag: "Tag",
@@ -535,7 +535,7 @@ export const dictionaries = {
     timeline: {
       title: "Activity",
       subtitle:
-        "Likes and comments made by the people you track. Filter by company below.",
+        "Likes and comments made by the people you track.",
       activities: "activities",
       empty: "No activity yet. Sync likes and comments from your tracked people.",
       liked: "liked",
@@ -575,7 +575,7 @@ export const dictionaries = {
         "Delete this profile?\n\nThis permanently removes all synced posts, likes, comments and employees. This cannot be undone.",
       tabPosts: "Posts",
       tabFeed: "Feed",
-      tabTimeline: "Timeline",
+      tabTimeline: "Activity",
       tabReactions: "Likes",
       tabComments: "Comments",
       tabEmployees: "Employees",

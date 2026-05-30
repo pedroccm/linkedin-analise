@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useDict } from "@/lib/i18n/client";
+import { useDict, useLocale } from "@/lib/i18n/client";
+import { fmtDay } from "@/lib/format";
 
 type Row = {
   id: string;
@@ -41,6 +42,7 @@ function Avatar({ row, isCompany }: { row: Row; isCompany: boolean }) {
 
 export function ProfileList({ profiles }: { profiles: Row[] }) {
   const t = useDict().home;
+  const locale = useLocale();
   const [filter, setFilter] = useState<"all" | "person" | "company">("all");
 
   const counts = {
@@ -113,7 +115,7 @@ export function ProfileList({ profiles }: { profiles: Row[] }) {
                     {t.posts}
                   </div>
                   {p.last_synced_at && (
-                    <div>{t.synced} {new Date(p.last_synced_at).toLocaleDateString()}</div>
+                    <div>{t.synced} {fmtDay(p.last_synced_at, locale)}</div>
                   )}
                 </div>
               </Link>

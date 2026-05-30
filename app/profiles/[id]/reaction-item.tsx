@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useDict } from "@/lib/i18n/client";
+import { useDict, useLocale } from "@/lib/i18n/client";
 import { fmtDateTime } from "@/lib/format";
 
 type Reaction = {
@@ -24,6 +24,7 @@ const LIMIT = 240;
 export function ReactionItem({ reaction }: { reaction: Reaction }) {
   const [expanded, setExpanded] = useState(false);
   const dict = useDict();
+  const locale = useLocale();
   const c = dict.common;
   const p = dict.profile;
   const text = reaction.post_content ?? "";
@@ -39,7 +40,7 @@ export function ReactionItem({ reaction }: { reaction: Reaction }) {
           )}
           {reaction.reacted_at && (
             <span className="ml-2">
-              · {fmtDateTime(reaction.reacted_at)}
+              · {fmtDateTime(reaction.reacted_at, locale)}
             </span>
           )}
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useDict } from "@/lib/i18n/client";
+import { useDict, useLocale } from "@/lib/i18n/client";
 import { fmtDateTime } from "@/lib/format";
 
 type Comment = {
@@ -22,6 +22,7 @@ const LIMIT = 240;
 export function CommentItem({ comment }: { comment: Comment }) {
   const [expanded, setExpanded] = useState(false);
   const dict = useDict();
+  const locale = useLocale();
   const c = dict.common;
   const p = dict.profile;
   const text = comment.commentary ?? "";
@@ -42,7 +43,7 @@ export function CommentItem({ comment }: { comment: Comment }) {
           )}
           {comment.commented_at && (
             <span className="ml-2">
-              · {fmtDateTime(comment.commented_at)}
+              · {fmtDateTime(comment.commented_at, locale)}
             </span>
           )}
         </div>
