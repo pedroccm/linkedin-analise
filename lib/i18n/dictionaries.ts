@@ -40,6 +40,8 @@ export const dictionaries = {
       orgYouBelong: "Você faz parte de",
       orgLeave: "Sair da organização",
       orgShared: "Os perfis, tags e feed são compartilhados com toda a organização.",
+      orgNeedCorporate: "Crie uma organização e convide seu time no plano Corporate.",
+      orgUpgrade: "Ver plano Corporate",
     },
     landing: {
       heroLine1: "Acompanhe qualquer perfil do LinkedIn.",
@@ -348,6 +350,8 @@ export const dictionaries = {
       orgYouBelong: "You belong to",
       orgLeave: "Leave organization",
       orgShared: "Profiles, tags and feed are shared with the whole organization.",
+      orgNeedCorporate: "Create an organization and invite your team on the Corporate plan.",
+      orgUpgrade: "See the Corporate plan",
     },
     landing: {
       heroLine1: "Track any LinkedIn profile.",

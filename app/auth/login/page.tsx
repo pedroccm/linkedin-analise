@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PasswordInput } from "../password-input";
 import { useDict } from "@/lib/i18n/client";
@@ -10,7 +10,11 @@ type Mode = "signin" | "signup" | "forgot";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const a = useDict().auth;
+  // Only allow same-site relative redirects.
+  const rawNext = searchParams.get("next") ?? "/";
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +37,7 @@ export default function LoginPage() {
         setError(error.message);
         return;
       }
-      router.push("/");
+      router.push(next);
       router.refresh();
       return;
     }

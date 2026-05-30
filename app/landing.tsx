@@ -55,8 +55,8 @@ export function Landing({ dict }: { dict: Dict }) {
           <h2 className="text-3xl font-semibold">{t.pricingTitle}</h2>
           <p className="text-[var(--color-text-muted)] mt-2">{t.pricingSub}</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-4">
-          {(["free", "starter", "pro"] as PlanTier[]).map((tier) => {
+        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {(["free", "starter", "pro", "corporate"] as PlanTier[]).map((tier) => {
             const plan = PLANS[tier];
             const highlighted = tier === "starter";
             return (

@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getSubscriptionStatus } from "@/lib/subscription";
 import type { Dict } from "@/lib/i18n/dictionaries";
 import {
   createOrganization,
@@ -187,7 +189,22 @@ export async function OrgSection({ a }: { a: Dict["account"] }) {
     );
   }
 
-  // No org → create one
+  // No org yet — only Corporate plan can create one
+  const status = await getSubscriptionStatus(user.id);
+  if (status.activeTier !== "corporate") {
+    return wrap(
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-sm text-[var(--color-text-muted)]">{a.orgNeedCorporate}</p>
+        <Link
+          href="/billing"
+          className="text-sm px-4 py-2 rounded bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] text-white no-underline transition-colors"
+        >
+          {a.orgUpgrade}
+        </Link>
+      </div>
+    );
+  }
+
   return wrap(
     <form action={createOrganization} className="flex flex-col sm:flex-row gap-2 sm:items-end">
       <label className="block flex-1">

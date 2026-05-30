@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getSubscriptionStatus } from "@/lib/subscription";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -17,6 +18,13 @@ export async function createOrganization(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim().slice(0, 80);
   if (!name) return;
   const { user } = await requireUser();
+
+  // Only an active Corporate plan can create an organization.
+  const status = await getSubscriptionStatus(user.id);
+  if (status.activeTier !== "corporate") {
+    redirect("/billing?reason=corporate");
+  }
+
   const admin = createServiceClient();
 
   // One org per owner for v1
