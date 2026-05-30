@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useDict } from "@/lib/i18n/client";
 
-export type TimelineKind = "reaction" | "comment";
+export type TimelineKind = "reaction" | "comment" | "post";
 
 export type TimelineRow = {
   key: string;
@@ -21,7 +21,12 @@ export type TimelineRow = {
   actionText?: string | null;
   // Comment-only
   commentary?: string | null;
-  // Target post
+  // Post-only (the actor's own post)
+  postText?: string | null;
+  likes?: number | null;
+  comments?: number | null;
+  reposts?: number | null;
+  // Target post (reaction / comment)
   postUrl?: string | null;
   postContent?: string | null;
   postAuthorName?: string | null;
@@ -39,8 +44,10 @@ export function TimelineItem({ row }: { row: TimelineRow }) {
   const verb =
     row.kind === "reaction" ? (
       <span className="text-[var(--color-danger)] font-medium">❤ {tl.liked}</span>
-    ) : (
+    ) : row.kind === "comment" ? (
       <span className="text-[var(--color-accent-2)] font-medium">💬 {tl.commentedOn}</span>
+    ) : (
+      <span className="text-[var(--color-success)] font-medium">📝 {tl.posted}</span>
     );
 
   const targetSnippet = row.postContent ?? "";
@@ -106,6 +113,34 @@ export function TimelineItem({ row }: { row: TimelineRow }) {
               {row.commentary}
             </div>
           )}
+
+          {/* The actor's own post text */}
+          {row.kind === "post" && row.postText && (
+            <div className="mt-2 text-sm leading-relaxed whitespace-pre-wrap">
+              {row.postText.length > LIMIT && !expanded
+                ? row.postText.slice(0, LIMIT).trimEnd() + "…"
+                : row.postText}
+              {row.postText.length > LIMIT && (
+                <button
+                  type="button"
+                  onClick={() => setExpanded((v) => !v)}
+                  className="block mt-1 text-xs text-[var(--color-accent-2)] hover:underline"
+                >
+                  {expanded ? c.showLess : c.showMore}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Engagement on the actor's own post */}
+          {row.kind === "post" &&
+            (row.likes || row.comments || row.reposts) && (
+              <div className="mt-2 flex gap-4 text-xs text-[var(--color-text-muted)]">
+                <span>❤ {row.likes ?? 0}</span>
+                <span>💬 {row.comments ?? 0}</span>
+                <span>🔁 {row.reposts ?? 0}</span>
+              </div>
+            )}
 
           {/* The post that was acted upon */}
           {targetSnippet && (

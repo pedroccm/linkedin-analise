@@ -217,6 +217,7 @@ export const dictionaries = {
       empty: "Nenhuma atividade ainda. Atualize likes e comments das pessoas que você acompanha.",
       liked: "curtiu",
       commentedOn: "comentou em",
+      posted: "publicou",
     },
     profile: {
       untitled: "Perfil sem nome",
@@ -274,9 +275,9 @@ export const dictionaries = {
       timelineNoPeople:
         "A atividade mostra likes e comments das pessoas que você acompanha nesta empresa. Acompanhe um funcionário primeiro com o botão + Acompanhar na aba Funcionários.",
       timelinePersonDesc:
-        "Likes e comments deste perfil em ordem cronológica.",
+        "Posts, likes e comments deste perfil em ordem cronológica.",
       timelinePersonEmpty:
-        "Nenhuma atividade ainda. Rode Sincronizar likes / comments neste perfil.",
+        "Nenhuma atividade ainda. Rode os syncs de posts, likes e comments neste perfil.",
       trackedTitle: "Pessoas acompanhadas nesta empresa",
       addPersonTitle: "Adicionar uma pessoa desta empresa",
       addPersonPlaceholder: "URL ou usuário do LinkedIn (ex: /in/williamhgates)",
@@ -538,6 +539,7 @@ export const dictionaries = {
       empty: "No activity yet. Sync likes and comments from your tracked people.",
       liked: "liked",
       commentedOn: "commented on",
+      posted: "posted",
     },
     profile: {
       untitled: "Untitled profile",
@@ -595,9 +597,9 @@ export const dictionaries = {
       timelineNoPeople:
         "Activity shows likes and comments from people you track at this company. Track an employee first with the + Track button in the Employees tab.",
       timelinePersonDesc:
-        "This profile's likes and comments in chronological order.",
+        "This profile's posts, likes and comments in chronological order.",
       timelinePersonEmpty:
-        "No activity yet. Run Sync likes / comments on this profile.",
+        "No activity yet. Run the posts, likes and comments syncs on this profile.",
       trackedTitle: "Tracked people at this company",
       addPersonTitle: "Add a person at this company",
       addPersonPlaceholder: "LinkedIn URL or handle (e.g. /in/williamhgates)",

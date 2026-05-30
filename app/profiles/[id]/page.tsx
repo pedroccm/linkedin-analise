@@ -532,6 +532,7 @@ async function PersonTimelineSection({
     since: rangeStartISO(range),
     query,
     limit: 200,
+    includePosts: true,
   });
 
   return (

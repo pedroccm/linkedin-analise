@@ -26,6 +26,7 @@ export type TimelineQueryOptions = {
   since?: string | null;
   query?: string;
   limit?: number;
+  includePosts?: boolean; // also merge the actors' own posts into the timeline
 };
 
 export async function fetchTimeline(
@@ -51,26 +52,43 @@ export async function fetchTimeline(
        actor:linkedin_profiles!inner(id, full_name, handle, avatar_url, profile_type)`
     );
 
+  let postsQ = options.includePosts
+    ? supabase
+        .from("linkedin_posts")
+        .select(
+          `id, post_url, posted_at, text_content, reactions_count, comments_count, reposts_count, profile_id,
+           actor:linkedin_profiles!inner(id, full_name, handle, avatar_url, profile_type)`
+        )
+    : null;
+
   if (options.actorIds && options.actorIds.length > 0) {
     reactionsQ = reactionsQ.in("profile_id", options.actorIds);
     commentsQ = commentsQ.in("profile_id", options.actorIds);
+    if (postsQ) postsQ = postsQ.in("profile_id", options.actorIds);
   }
 
   if (options.since) {
     reactionsQ = reactionsQ.gte("reacted_at", options.since);
     commentsQ = commentsQ.gte("commented_at", options.since);
+    if (postsQ) postsQ = postsQ.gte("posted_at", options.since);
   }
 
   if (options.query?.trim()) {
     const q = `%${options.query.trim()}%`;
     reactionsQ = reactionsQ.ilike("post_content", q);
     commentsQ = commentsQ.or(`commentary.ilike.${q},parent_post_content.ilike.${q}`);
+    if (postsQ) postsQ = postsQ.ilike("text_content", q);
   }
 
-  const [{ data: rawReactions }, { data: rawComments }] = await Promise.all([
-    reactionsQ.order("reacted_at", { ascending: false, nullsFirst: false }).limit(limit),
-    commentsQ.order("commented_at", { ascending: false, nullsFirst: false }).limit(limit),
-  ]);
+  const [{ data: rawReactions }, { data: rawComments }, postsResp] =
+    await Promise.all([
+      reactionsQ.order("reacted_at", { ascending: false, nullsFirst: false }).limit(limit),
+      commentsQ.order("commented_at", { ascending: false, nullsFirst: false }).limit(limit),
+      postsQ
+        ? postsQ.order("posted_at", { ascending: false, nullsFirst: false }).limit(limit)
+        : Promise.resolve({ data: null }),
+    ]);
+  const rawPosts = postsResp.data;
 
   type RR = {
     id: string;
@@ -120,7 +138,31 @@ export async function fetchTimeline(
       postAuthorUrl: c.parent_post_author_url,
     })) ?? [];
 
-  const merged = [...reactionRows, ...commentRows].sort((a, b) => {
+  type RP = {
+    id: string;
+    post_url: string | null;
+    posted_at: string | null;
+    text_content: string | null;
+    reactions_count: number | null;
+    comments_count: number | null;
+    reposts_count: number | null;
+    actor: ActorPick | ActorPick[] | null;
+  };
+
+  const postRows: TimelineRow[] =
+    (rawPosts as RP[] | null)?.map((p) => ({
+      key: `p:${p.id}`,
+      kind: "post",
+      occurredAt: p.posted_at,
+      actor: pickActor(p.actor),
+      postText: p.text_content,
+      likes: p.reactions_count,
+      comments: p.comments_count,
+      reposts: p.reposts_count,
+      postUrl: p.post_url,
+    })) ?? [];
+
+  const merged = [...reactionRows, ...commentRows, ...postRows].sort((a, b) => {
     const av = a.occurredAt ? new Date(a.occurredAt).getTime() : 0;
     const bv = b.occurredAt ? new Date(b.occurredAt).getTime() : 0;
     return bv - av;
