@@ -250,10 +250,11 @@ export const dictionaries = {
         "Excluir este perfil?\n\nIsso remove permanentemente todos os posts, likes, comments e funcionários sincronizados. Não dá pra desfazer.",
       tabPosts: "Posts",
       tabFeed: "Feed",
-      tabTimeline: "Atividade",
+      tabTimeline: "Timeline",
       tabReactions: "Likes",
       tabComments: "Comments",
       tabEmployees: "Funcionários",
+      tabStats: "Estatísticas",
       allPosts: "Todos os posts",
       postsMatch: "posts encontrados",
       noPostsFilter: "Nenhum post bate com o filtro atual.",
@@ -272,6 +273,10 @@ export const dictionaries = {
         "Nenhuma atividade ainda. Rode Sincronizar likes / comments numa pessoa acompanhada.",
       timelineNoPeople:
         "A atividade mostra likes e comments das pessoas que você acompanha nesta empresa. Acompanhe um funcionário primeiro com o botão + Acompanhar na aba Funcionários.",
+      timelinePersonDesc:
+        "Likes e comments deste perfil em ordem cronológica.",
+      timelinePersonEmpty:
+        "Nenhuma atividade ainda. Rode Sincronizar likes / comments neste perfil.",
       trackedTitle: "Pessoas acompanhadas nesta empresa",
       addPersonTitle: "Adicionar uma pessoa desta empresa",
       addPersonPlaceholder: "URL ou usuário do LinkedIn (ex: /in/williamhgates)",
@@ -566,10 +571,11 @@ export const dictionaries = {
         "Delete this profile?\n\nThis permanently removes all synced posts, likes, comments and employees. This cannot be undone.",
       tabPosts: "Posts",
       tabFeed: "Feed",
-      tabTimeline: "Activity",
+      tabTimeline: "Timeline",
       tabReactions: "Likes",
       tabComments: "Comments",
       tabEmployees: "Employees",
+      tabStats: "Stats",
       allPosts: "All posts",
       postsMatch: "posts match",
       noPostsFilter: "No posts match the current filter.",
@@ -588,6 +594,10 @@ export const dictionaries = {
         "No activity yet. Run Sync likes / comments on a tracked person.",
       timelineNoPeople:
         "Activity shows likes and comments from people you track at this company. Track an employee first with the + Track button in the Employees tab.",
+      timelinePersonDesc:
+        "This profile's likes and comments in chronological order.",
+      timelinePersonEmpty:
+        "No activity yet. Run Sync likes / comments on this profile.",
       trackedTitle: "Tracked people at this company",
       addPersonTitle: "Add a person at this company",
       addPersonPlaceholder: "LinkedIn URL or handle (e.g. /in/williamhgates)",

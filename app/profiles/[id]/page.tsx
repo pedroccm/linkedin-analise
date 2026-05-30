@@ -55,7 +55,8 @@ function parseTab(
     if (v === "timeline") return "timeline";
     return "feed"; // default for companies
   }
-  if (v === "reactions" || v === "comments") return v;
+  if (v === "reactions" || v === "comments" || v === "timeline" || v === "stats")
+    return v;
   return "posts";
 }
 
@@ -238,6 +239,10 @@ export default async function ProfilePage({
         posts: profile.posts_count ?? 0,
         reactions: profile.reactions_count_total ?? 0,
         comments: profile.comments_count_total ?? 0,
+        timeline:
+          (profile.reactions_count_total ?? 0) +
+          (profile.comments_count_total ?? 0),
+        // stats: no badge
       };
 
   return (
@@ -415,6 +420,7 @@ export default async function ProfilePage({
           profileId={profile.id}
           profileType={profileType}
           t={t}
+          showStats={isCompany}
         />
       )}
       {tab === "reactions" && !isCompany && (
@@ -422,6 +428,17 @@ export default async function ProfilePage({
       )}
       {tab === "comments" && !isCompany && (
         <CommentsSection profileId={profile.id} t={t} />
+      )}
+      {tab === "timeline" && !isCompany && (
+        <PersonTimelineSection
+          profileId={profile.id}
+          range={range}
+          query={query}
+          t={t}
+        />
+      )}
+      {tab === "stats" && !isCompany && (
+        <StatsSection profileId={profile.id} t={t} />
       )}
       {tab === "feed" && isCompany && (
         <FeedSection
@@ -452,10 +469,12 @@ async function PostsSection({
   profileId,
   profileType,
   t,
+  showStats = true,
 }: {
   profileId: string;
   profileType: "person" | "company";
   t: ProfileT;
+  showStats?: boolean;
 }) {
   const supabase = await createClient();
 
@@ -470,10 +489,69 @@ async function PostsSection({
 
   return (
     <div className="space-y-6">
-      <StatsCard profileId={profileId} t={t} />
-      {profileType === "person" && <TopEngagedAuthors profileId={profileId} t={t} />}
+      {showStats && <StatsCard profileId={profileId} t={t} />}
+      {showStats && profileType === "person" && (
+        <TopEngagedAuthors profileId={profileId} t={t} />
+      )}
 
       <PostsPanel posts={posts ?? []} />
+    </div>
+  );
+}
+
+// Person Stats tab: the engagement breakdown + who they engage with most.
+async function StatsSection({
+  profileId,
+  t,
+}: {
+  profileId: string;
+  t: ProfileT;
+}) {
+  return (
+    <div className="space-y-6">
+      <StatsCard profileId={profileId} t={t} />
+      <TopEngagedAuthors profileId={profileId} t={t} />
+    </div>
+  );
+}
+
+// Person Timeline tab: this profile's own likes + comments, merged chronologically.
+async function PersonTimelineSection({
+  profileId,
+  range,
+  query,
+  t,
+}: {
+  profileId: string;
+  range: string;
+  query: string;
+  t: ProfileT;
+}) {
+  const rows = await fetchTimeline({
+    actorIds: [profileId],
+    since: rangeStartISO(range),
+    query,
+    limit: 200,
+  });
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-[var(--color-text-muted)]">
+        {t.timelinePersonDesc}
+      </p>
+      <p className="text-xs text-[var(--color-text-muted)]">
+        {rows.length} {t.tabTimeline.toLowerCase()}
+      </p>
+      {rows.length === 0 && (
+        <p className="text-[var(--color-text-muted)] text-sm">
+          {t.timelinePersonEmpty}
+        </p>
+      )}
+      <ul className="grid gap-3">
+        {rows.map((row) => (
+          <TimelineItem key={row.key} row={row} />
+        ))}
+      </ul>
     </div>
   );
 }

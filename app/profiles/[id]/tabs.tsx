@@ -7,7 +7,8 @@ export type Tab =
   | "timeline"
   | "reactions"
   | "comments"
-  | "employees";
+  | "employees"
+  | "stats";
 
 export function Tabs({
   profileId,
@@ -26,6 +27,8 @@ export function Tabs({
     { key: "posts", label: t.tabPosts },
     { key: "reactions", label: t.tabReactions },
     { key: "comments", label: t.tabComments },
+    { key: "timeline", label: t.tabTimeline },
+    { key: "stats", label: t.tabStats },
   ];
   const companyOptions: Array<{ key: Tab; label: string }> = [
     { key: "feed", label: t.tabFeed },
@@ -58,7 +61,9 @@ export function Tabs({
             }
           >
             {o.label}
-            <span className="text-xs ml-2 opacity-70">{counts[o.key] ?? 0}</span>
+            {counts[o.key] !== undefined && (
+              <span className="text-xs ml-2 opacity-70">{counts[o.key]}</span>
+            )}
           </Link>
         );
       })}

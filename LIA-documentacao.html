@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIA · Documentação técnica</title>
+<style>
+  :root{
+    --bg:#0b0e14; --surface:#11161f; --surface-2:#161c27; --border:#222a37;
+    --text:#e6e9ef; --muted:#8b94a7; --accent:#4f8cff; --accent-2:#7aa7ff;
+    --good:#7ee2a5; --good-bg:#0f3a1f; --warn:#f5c563; --danger:#ff6b6b;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px;line-height:1.6}
+  a{color:var(--accent-2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .layout{display:flex;min-height:100vh}
+  /* Sidebar */
+  nav.side{width:280px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+    position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 0}
+  nav.side .brand{padding:0 24px 16px;border-bottom:1px solid var(--border);margin-bottom:12px}
+  nav.side .brand h1{font-size:20px;margin:0;letter-spacing:.5px}
+  nav.side .brand .v{color:var(--muted);font-size:12px;font-family:var(--mono)}
+  nav.side a{display:block;padding:7px 24px;color:var(--muted);font-size:14px;border-left:2px solid transparent}
+  nav.side a:hover{color:var(--text);background:var(--surface-2);text-decoration:none}
+  nav.side a.active{color:var(--accent-2);border-left-color:var(--accent);background:var(--surface-2)}
+  nav.side .grp{padding:14px 24px 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#5a6577}
+  /* Main */
+  main{flex:1;max-width:980px;margin:0 auto;padding:40px 48px 120px}
+  section{margin-bottom:56px;scroll-margin-top:24px}
+  h2{font-size:26px;margin:0 0 6px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+  h3{font-size:18px;margin:28px 0 10px;color:var(--accent-2)}
+  h4{font-size:15px;margin:20px 0 8px}
+  p{margin:10px 0}
+  .lead{color:var(--muted);font-size:15px}
+  code{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--border);
+    border-radius:4px;padding:1px 6px;color:#cdd6e6}
+  pre{background:#0a0d13;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;
+    font-family:var(--mono);font-size:12.5px;line-height:1.55;color:#cdd6e6}
+  pre code{background:none;border:none;padding:0}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+  tr:hover td{background:var(--surface-2)}
+  .pill{display:inline-block;font-size:11px;padding:1px 8px;border-radius:20px;border:1px solid var(--border);
+    background:var(--surface-2);color:var(--muted);font-family:var(--mono)}
+  .pill.get{color:var(--good);border-color:#1f5a36;background:var(--good-bg)}
+  .pill.post{color:var(--warn);border-color:#5a4a1f;background:#3a2e0f}
+  .pill.auth{color:var(--accent-2);border-color:#26406b;background:#0e1b30}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin:14px 0}
+  .card h4{margin-top:0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:14px 0}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+  .stat .k{font-size:12px;color:var(--muted)}
+  .stat .v{font-size:20px;font-weight:600;margin-top:2px}
+  .note{border-left:3px solid var(--accent);background:var(--surface-2);padding:10px 16px;border-radius:0 6px 6px 0;margin:14px 0}
+  .note.warn{border-left-color:var(--warn)}
+  .note.good{border-left-color:var(--good)}
+  .path{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  ul.tight{margin:8px 0;padding-left:20px}
+  ul.tight li{margin:3px 0}
+  .toc-top{color:var(--muted);font-size:13px;margin-bottom:30px}
+  hr{border:none;border-top:1px solid var(--border);margin:30px 0}
+  @media(max-width:880px){
+    nav.side{display:none}
+    main{padding:24px 18px 80px}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="side">
+  <div class="brand">
+    <h1>LIA</h1>
+    <div class="v">LinkedIn Intelligence · v0.2.0</div>
+  </div>
+  <div class="grp">Fundamentos</div>
+  <a href="#visao">Visão geral</a>
+  <a href="#stack">Stack & arquitetura</a>
+  <a href="#tenant">Multi-tenant & planos</a>
+  <div class="grp">Superfície</div>
+  <a href="#paginas">Mapa de páginas</a>
+  <a href="#apis">APIs / rotas</a>
+  <div class="grp">Subsistemas</div>
+  <a href="#sync">Sincronização (Apify)</a>
+  <a href="#monitor">Monitoramento</a>
+  <a href="#dados">Modelo de dados</a>
+  <a href="#i18n">Internacionalização</a>
+  <div class="grp">Operação</div>
+  <a href="#env">Variáveis de ambiente</a>
+  <a href="#local">Rodar local</a>
+  <a href="#deploy">Deploy & migrations</a>
+  <a href="#admin">Área admin</a>
+</nav>
+
+<main>
+<p class="toc-top">Documentação de referência · gerada em 2026-05-30 · produção: <a href="https://lia-analise.netlify.app" target="_blank">lia-analise.netlify.app</a></p>
+
+<!-- ===================== VISÃO GERAL ===================== -->
+<section id="visao">
+  <h2>Visão geral</h2>
+  <p class="lead">LIA é um SaaS para rastrear e analisar perfis (pessoas e empresas) do LinkedIn. O usuário adiciona um perfil pela URL, o LIA puxa via Apify os posts, reações, comentários e funcionários, armazena no Supabase e apresenta em feed, timeline e páginas de perfil. Tem auth por email/senha, billing por PIX, planos por número de perfis, workspaces corporativos compartilhados e monitoramento diário com alerta de WhatsApp.</p>
+  <div class="grid">
+    <div class="stat"><div class="k">Frontend</div><div class="v">Next.js 16</div></div>
+    <div class="stat"><div class="k">Banco / Auth</div><div class="v">Supabase</div></div>
+    <div class="stat"><div class="k">Scraping</div><div class="v">Apify</div></div>
+    <div class="stat"><div class="k">Pagamento</div><div class="v">AbacatePay PIX</div></div>
+    <div class="stat"><div class="k">Deploy</div><div class="v">Netlify</div></div>
+    <div class="stat"><div class="k">Idiomas</div><div class="v">pt / en</div></div>
+  </div>
+  <div class="note">
+    O banco é compartilhado com o projeto fotofocinho (mesma instância Supabase, ref <code>iynirubuonhsnxzzmrry</code>). Por isso todas as tabelas do LIA usam o prefixo <code>linkedin_</code> para não colidir.
+  </div>
+</section>
+
+<!-- ===================== STACK ===================== -->
+<section id="stack">
+  <h2>Stack & arquitetura</h2>
+  <h3>Tecnologias</h3>
+  <table>
+    <tr><th>Camada</th><th>Tecnologia</th><th>Notas</th></tr>
+    <tr><td>Framework</td><td>Next.js 16 (App Router)</td><td>Server Components + Server Actions. Middleware em <code>proxy.ts</code> (renome do middleware.ts no Next 16)</td></tr>
+    <tr><td>UI</td><td>React 19 + Tailwind v4</td><td>Tailwind v4 exige <code>postcss.config.mjs</code></td></tr>
+    <tr><td>Banco</td><td>Supabase (Postgres 15)</td><td>RLS por workspace, Storage, Auth</td></tr>
+    <tr><td>Scraping</td><td>Apify (atores harvestapi)</td><td>Chamadas sync-get-dataset-items, cache global 24h</td></tr>
+    <tr><td>Pagamento</td><td>AbacatePay</td><td>PIX QR Code, expira em 30 min</td></tr>
+    <tr><td>i18n</td><td>Dicionários próprios</td><td>Sem biblioteca (npm install é proibido no fluxo); pt/en</td></tr>
+  </table>
+
+  <h3>Fluxo de dados</h3>
+  <pre><code>Usuário cola URL do LinkedIn
+   -> addProfile (server action)        valida, checa limite do plano, grava em linkedin_profiles
+   -> /api/profiles/[id]/sync           chama Apify (posts + detalhes)
+        -> cache global (linkedin_scrape_cache)   reusa scrape entre workspaces
+        -> mirror de avatar (Storage bucket avatars)
+        -> upsert linkedin_posts / *_reactions / *_comments / *_employees
+        -> logSync (linkedin_sync_log)   registra itens + custo estimado
+   -> UI lê do Supabase (feed, timeline, perfil) com RLS por workspace</code></pre>
+
+  <h3>Organização do código</h3>
+  <ul class="tight">
+    <li><span class="path">app/</span> rotas (App Router): páginas, server actions (<code>actions.ts</code>) e API routes (<code>api/**/route.ts</code>)</li>
+    <li><span class="path">lib/</span> lógica de domínio: Apify, sync, monitor, planos, assinatura, workspace, i18n, clientes Supabase</li>
+    <li><span class="path">supabase/migrations/</span> schema versionado (.sql por timestamp)</li>
+    <li><span class="path">proxy.ts</span> middleware que mantém a sessão Supabase fresca a cada request</li>
+  </ul>
+</section>
+
+<!-- ===================== MULTI-TENANT ===================== -->
+<section id="tenant">
+  <h2>Multi-tenant & planos</h2>
+  <p>Cada dado pertence a um <strong>workspace</strong>. Para um usuário solo, o workspace é ele mesmo. Para um membro de organização, o workspace é o <strong>dono da org</strong>: todos os membros compartilham os mesmos perfis, tags e feed.</p>
+
+  <h3>Como funciona o workspace</h3>
+  <ul class="tight">
+    <li><strong>Leitura (RLS):</strong> as tabelas <code>linkedin_*</code> filtram por <code>user_id in (select lia_workspace_ids())</code>. A função SQL <code>lia_workspace_ids()</code> retorna o próprio <code>auth.uid()</code> mais os <code>owner_id</code> de toda org em que o usuário é membro.</li>
+    <li><strong>Escrita:</strong> <code>workspaceOwnerId(supabase, userId)</code> (em <span class="path">lib/workspace.ts</span>) resolve o dono do workspace; os dados são gravados sob o id dele.</li>
+    <li><strong>Assinatura:</strong> <code>getSubscriptionStatus</code> (em <span class="path">lib/subscription.ts</span>) resolve plano e contagem de perfis pelo dono do workspace, então membros herdam o plano da org.</li>
+  </ul>
+
+  <h3>Planos</h3>
+  <p class="path">Fonte: lib/plans.ts · preços em centavos de BRL · ciclo de 30 dias por pagamento PIX</p>
+  <table>
+    <tr><th>Plano</th><th>Preço</th><th>Limite de perfis</th><th>Destaques</th></tr>
+    <tr><td>Free</td><td>R$ 0</td><td>1</td><td>Syncs ilimitados</td></tr>
+    <tr><td>Starter</td><td>R$ 29,00</td><td>5</td><td>30 dias</td></tr>
+    <tr><td>Pro</td><td>R$ 90,00</td><td>20</td><td>Suporte prioritário</td></tr>
+    <tr><td>Corporate</td><td>R$ 299,00</td><td>100</td><td>Workspace compartilhado, convite de membros</td></tr>
+  </table>
+  <div class="note">Só o plano Corporate pode criar uma organização e convidar membros. A criação é bloqueada no form do <code>/account</code> e na server action (redireciona para <code>/billing?reason=corporate</code>).</div>
+</section>
+
+<!-- ===================== PÁGINAS ===================== -->
+<section id="paginas">
+  <h2>Mapa de páginas</h2>
+  <table>
+    <tr><th>Rota</th><th>Login</th><th>Admin</th><th>O que é</th></tr>
+    <tr><td><code>/</code></td><td>sim</td><td>não</td><td>Listagem de perfis + adicionar perfil (ou landing se deslogado)</td></tr>
+    <tr><td><code>/profiles/[id]</code></td><td>sim</td><td>não</td><td>Página do perfil com abas, tags, sync, monitorar</td></tr>
+    <tr><td><code>/feed</code></td><td>sim</td><td>não</td><td>Feed global de posts, com filtros</td></tr>
+    <tr><td><code>/timeline</code></td><td>sim</td><td>não</td><td>Timeline agregada de reações + comentários</td></tr>
+    <tr><td><code>/account</code></td><td>sim</td><td>não</td><td>Conta: nome, WhatsApp, plano, organização, logout</td></tr>
+    <tr><td><code>/billing</code></td><td>sim</td><td>não</td><td>Planos e checkout PIX</td></tr>
+    <tr><td><code>/invite/[token]</code></td><td>sim</td><td>não</td><td>Aceitar convite de organização</td></tr>
+    <tr><td><code>/auth/login</code></td><td>não</td><td>não</td><td>Entrar / cadastrar / esqueci a senha</td></tr>
+    <tr><td><code>/auth/callback</code></td><td>não</td><td>não</td><td>Troca de code por sessão (link de email)</td></tr>
+    <tr><td><code>/auth/reset-password</code></td><td>não</td><td>não</td><td>Definir nova senha</td></tr>
+    <tr><td><code>/auth/signout</code></td><td>sim</td><td>não</td><td>Logout (POST)</td></tr>
+    <tr><td><code>/admin</code> e sub-rotas</td><td>sim</td><td>sim</td><td>Dashboard, usuários, pagamentos, uso, logs</td></tr>
+  </table>
+
+  <h3>/ (listagem)</h3>
+  <p class="path">app/page.tsx · app/actions.ts</p>
+  <ul class="tight">
+    <li>Deslogado: renderiza a <strong>landing</strong> (hero, features, preços, FAQ). Logado: form de adicionar perfil + lista.</li>
+    <li>Lê <code>linkedin_profiles</code>; filtro por tipo (todos / pessoas / empresas) via <code>ProfileList</code>.</li>
+    <li>Sugestões de perfis (top voices) aparecem quando há menos de 2 perfis (<span class="path">lib/suggested-profiles.ts</span>).</li>
+    <li><code>SyncAllButton</code> dispara o sync de todos os perfis em segundo plano.</li>
+  </ul>
+  <h4>Server actions (app/actions.ts)</h4>
+  <ul class="tight">
+    <li><code>addProfile</code>: normaliza a URL, detecta tipo (in/company), checa <code>canAddProfile</code> (limite do plano, senão <code>/billing?reason=limit</code>), faz upsert deduplicado por (workspace, url) e redireciona para <code>/profiles/{id}?autosync=1</code>.</li>
+    <li><code>trackEmployee</code>: transforma um funcionário de empresa em perfil rastreado e faz o back-link em <code>linkedin_company_employees.tracked_profile_id</code>.</li>
+    <li><code>deleteProfile</code>: remove o perfil.</li>
+  </ul>
+
+  <h3>/profiles/[id]</h3>
+  <p class="path">app/profiles/[id]/page.tsx</p>
+  <ul class="tight">
+    <li>Aceita UUID ou handle na URL (ex.: <code>/profiles/williamhgates</code>).</li>
+    <li>Cabeçalho: avatar (espelhado no Storage), chips (verificado, criador, influencer, premium, etc.), métricas, tags, botão <strong>Monitorar</strong> e botão <strong>Sync</strong>.</li>
+    <li>Abas para <strong>pessoa</strong>: Posts, Reactions, Comments. Para <strong>empresa</strong>: Feed, Timeline, Posts, Employees.</li>
+    <li>Posts têm estatísticas (StatsCard, posts por semana, top autores engajados) e filtros client-side instantâneos.</li>
+    <li>Tags: criar/atrelar tags ao perfil (<span class="path">app/tag-actions.ts</span>).</li>
+  </ul>
+
+  <h3>/feed e /timeline</h3>
+  <p class="path">app/feed/page.tsx · app/timeline/page.tsx</p>
+  <ul class="tight">
+    <li>Somente leitura. Filtros por URL: <code>company</code>, <code>tag</code>, <code>q</code> (busca em texto), <code>range</code> (30d/90d/6m/1y) e, no feed, <code>sort</code> (recent/likes/comments/reposts).</li>
+    <li>Feed lê <code>linkedin_posts</code> com join no autor. Timeline usa <code>fetchTimeline()</code> (<span class="path">lib/timeline.ts</span>), que mescla reações e comentários ordenados por data.</li>
+  </ul>
+
+  <h3>/account</h3>
+  <p class="path">app/account/page.tsx · app/account/actions.ts · app/account/org-section.tsx</p>
+  <ul class="tight">
+    <li>Edita nome e <strong>WhatsApp</strong> (<code>updateAccountName</code> grava em <code>linkedin_users_meta</code>; o número é normalizado para <code>+&lt;dígitos&gt;</code>).</li>
+    <li>Mostra plano atual + perfis usados/limite + dias restantes.</li>
+    <li>Seção Organização: dono gerencia membros e convites; membro vê a org e pode sair; sem Corporate, vê upsell.</li>
+  </ul>
+
+  <h3>/billing</h3>
+  <p class="path">app/billing/page.tsx</p>
+  <ul class="tight">
+    <li>Cartões de plano (Starter, Pro, Corporate) com checkout PIX. Aviso quando chega via <code>?reason=limit</code>.</li>
+  </ul>
+
+  <h3>/invite/[token]</h3>
+  <ul class="tight">
+    <li>Deslogado, redireciona para login com <code>?next=/invite/{token}</code> (o login honra o <code>next</code>).</li>
+    <li>Convite válido: mostra a org e botão Aceitar (<code>acceptInvite</code>). Inválido: mensagem de convite inválido.</li>
+  </ul>
+</section>
+
+<!-- ===================== APIS ===================== -->
+<section id="apis">
+  <h2>APIs / rotas</h2>
+  <p class="lead">Todas em <span class="path">app/api/**/route.ts</span>. As rotas de sync rodam no runtime Node com <code>maxDuration = 300</code>.</p>
+
+  <h3>Perfil · sincronização</h3>
+  <div class="card">
+    <h4><span class="pill post">POST</span> <code>/api/profiles/[id]/sync</code> <span class="pill auth">login</span></h4>
+    <p>Sincroniza detalhes + posts (pessoa ou empresa). Retorna <code>{ inserted, total, detailsLoaded?, errors? }</code>.</p>
+  </div>
+  <div class="card">
+    <h4><span class="pill post">POST</span> <code>/api/profiles/[id]/sync-reactions</code> <span class="pill auth">login</span></h4>
+    <p>Sincroniza as reações (likes) do perfil. Retorna <code>{ inserted, total }</code>.</p>
+  </div>
+  <div class="card">
+    <h4><span class="pill post">POST</span> <code>/api/profiles/[id]/sync-comments</code> <span class="pill auth">login</span></h4>
+    <p>Sincroniza os comentários do perfil. Retorna <code>{ inserted, total }</code>.</p>
+  </div>
+  <div class="card">
+    <h4><span class="pill post">POST</span> <code>/api/profiles/[id]/sync-employees</code> <span class="pill auth">login</span></h4>
+    <p>Sincroniza funcionários (só empresa). Retorna <code>{ inserted, total }</code>.</p>
+  </div>
+
+  <h3>Monitoramento</h3>
+  <div class="card">
+    <h4><span class="pill get">GET</span> <span class="pill post">POST</span> <code>/api/cron/monitor</code> <span class="pill auth">CRON_SECRET</span></h4>
+    <p>Roda o motor de monitoramento. Autorização por header <code>Authorization: Bearer &lt;CRON_SECRET&gt;</code> ou query <code>?secret=&lt;CRON_SECRET&gt;</code>. Retorna <code>{ ok, checked, newPosts, events, errors }</code>. Veja a seção <a href="#monitor">Monitoramento</a>.</p>
+  </div>
+
+  <h3>Pagamento</h3>
+  <div class="card">
+    <h4><span class="pill post">POST</span> <code>/api/checkout</code> <span class="pill auth">login</span></h4>
+    <p>Cria cobrança PIX via AbacatePay. Body: <code>{ plan?: "starter"|"pro"|"corporate" }</code>. Insere em <code>linkedin_payments</code> (status pending) e retorna <code>{ paymentId, pixId, brCode, brCodeBase64, amount, expiresAt }</code>. O PIX vale 30 min.</p>
+  </div>
+  <div class="card">
+    <h4><span class="pill get">GET</span> <code>/api/checkout/status</code> <span class="pill auth">login</span></h4>
+    <p>Consulta o status do PIX (<code>?paymentId=...</code>). Quando pago, executa <code>fulfillPayment()</code>: marca como paid e estende <code>subscription_until</code> em +30 dias. <code>?simulate=true</code> só funciona em dev.</p>
+  </div>
+
+  <h3>Diversos</h3>
+  <div class="card">
+    <h4><span class="pill post">POST</span> <code>/api/locale</code> <span class="pill">público</span></h4>
+    <p>Define o cookie <code>lia_locale</code> (1 ano). Se logado, persiste em <code>linkedin_users_meta.locale</code>. Body: <code>{ locale: "pt"|"en" }</code>.</p>
+  </div>
+  <div class="card">
+    <h4><span class="pill post">POST</span> <code>/api/admin/users/[userId]/sync-all</code> <span class="pill auth">admin</span></h4>
+    <p>Sincroniza todos os perfis de um usuário (details+posts; empresa: employees; pessoa: reactions+comments). Retorna <code>{ profiles, steps, ok, failed, results[] }</code>.</p>
+  </div>
+</section>
+
+<!-- ===================== SYNC ===================== -->
+<section id="sync">
+  <h2>Sincronização (Apify)</h2>
+  <p class="path">lib/sync-core.ts · lib/apify.ts · lib/sync-log.ts</p>
+  <p>O LIA chama atores do Apify (família <code>harvestapi</code>) via <code>run-sync-get-dataset-items</code>. Cada actor é configurável por env var; há um padrão (fallback) no código.</p>
+
+  <h3>Atores e limites</h3>
+  <table>
+    <tr><th>Sync</th><th>Actor (padrão)</th><th>Limite (env)</th></tr>
+    <tr><td>Posts (pessoa)</td><td><code>harvestapi~linkedin-profile-posts</code></td><td><code>APIFY_MAX_POSTS</code> (100)</td></tr>
+    <tr><td>Detalhes (pessoa)</td><td><code>harvestapi~linkedin-profile-scraper</code></td><td>1</td></tr>
+    <tr><td>Posts (empresa)</td><td><code>harvestapi~linkedin-company-posts</code></td><td><code>APIFY_MAX_POSTS</code></td></tr>
+    <tr><td>Detalhes (empresa)</td><td><code>harvestapi~linkedin-company</code></td><td>1</td></tr>
+    <tr><td>Reações</td><td><code>harvestapi~linkedin-profile-reactions</code></td><td><code>APIFY_MAX_REACTIONS</code> (200)</td></tr>
+    <tr><td>Comentários</td><td><code>harvestapi~linkedin-profile-comments</code></td><td><code>APIFY_MAX_COMMENTS</code> (200)</td></tr>
+    <tr><td>Funcionários</td><td><code>harvestapi~linkedin-company-employees</code></td><td><code>APIFY_MAX_EMPLOYEES</code> (100, pagina de 25)</td></tr>
+  </table>
+  <div class="note">O default no código é menor que o de produção em alguns casos (ex.: reações/comentários têm fallback 50 no código, mas as env vars de produção colocam 200). Sempre o env vence.</div>
+
+  <h3>Cache global de scrape</h3>
+  <p class="path">tabela linkedin_scrape_cache · função cachedActor() em lib/sync-core.ts</p>
+  <ul class="tight">
+    <li>Chave: <code>(canonical_url, sync_type)</code>. A URL é normalizada por <code>canonicalLinkedinUrl()</code> para <code>https://www.linkedin.com/{in|company}/{handle}</code>.</li>
+    <li>TTL: <code>SCRAPE_CACHE_TTL_HOURS</code> (24h por padrão). Dentro do TTL, qualquer workspace reusa o resultado em vez de pagar o Apify de novo.</li>
+    <li>Só service-role lê/escreve (RLS ligada, sem policies), então não vaza entre usuários.</li>
+  </ul>
+
+  <h3>Custo registrado</h3>
+  <p class="path">logSync() em lib/sync-log.ts · tabela linkedin_sync_log (custo em micro-USD)</p>
+  <table>
+    <tr><th>Tipo</th><th>Custo estimado</th></tr>
+    <tr><td>details_posts</td><td>2000/item + 4000 fixo (micro-USD)</td></tr>
+    <tr><td>reactions</td><td>2000/item</td></tr>
+    <tr><td>comments</td><td>2000/item</td></tr>
+    <tr><td>company_employees</td><td>4000/item</td></tr>
+    <tr><td>cache hit</td><td>0 (custo zero)</td></tr>
+  </table>
+  <p class="lead">1000 micro-USD = US$ 0,001. A área admin converte para BRL e calcula margem.</p>
+</section>
+
+<!-- ===================== MONITOR ===================== -->
+<section id="monitor">
+  <h2>Monitoramento</h2>
+  <p class="path">lib/monitor.ts · app/api/cron/monitor/route.ts · app/profiles/[id]/monitor-*.* </p>
+  <p>O LIA detecta posts novos e <strong>enfileira</strong> eventos de alerta. O envio do WhatsApp é um <strong>sistema à parte</strong> (a construir) que consome a fila. O LIA nunca envia mensagem.</p>
+
+  <h3>Como funciona</h3>
+  <ol class="tight">
+    <li>Toggle <strong>Monitorar</strong> 🔔 na página do perfil grava <code>monitor_enabled</code> (compartilhado no workspace). Ao ligar, usa o último post conhecido como baseline (não alerta sobre o que já existia).</li>
+    <li>O número de WhatsApp fica por usuário em <code>/account</code> (<code>linkedin_users_meta.whatsapp</code>).</li>
+    <li>Um cron diário bate em <code>/api/cron/monitor</code>. O motor faz um <strong>probe</strong> do post mais recente de cada perfil monitorado, reusando o cache global (perfil monitorado por vários workspaces custa 1 chamada Apify).</li>
+    <li>Se o post mudou, enfileira 1 linha por destinatário (todos no workspace com WhatsApp) em <code>linkedin_monitor_events</code> e atualiza <code>last_monitored_post_id</code>.</li>
+  </ol>
+
+  <div class="note warn">O agendador ainda não está definido. Basta bater no endpoint 1x/dia (n8n, Netlify scheduled function, etc.) com o <code>CRON_SECRET</code> que está nas env vars do Netlify.</div>
+
+  <h3>Contrato da fila (linkedin_monitor_events)</h3>
+  <p>RLS ligada sem policies: só service-role escreve; o sender externo lê via service-role ou conexão direta no Postgres.</p>
+  <table>
+    <tr><th>Coluna</th><th>Conteúdo</th></tr>
+    <tr><td><code>profile_name, profile_url</code></td><td>Quem publicou</td></tr>
+    <tr><td><code>apify_post_id, post_url, post_excerpt, posted_at</code></td><td>O post novo</td></tr>
+    <tr><td><code>recipient_user_id, whatsapp</code></td><td>Para quem mandar</td></tr>
+    <tr><td><code>status</code></td><td><code>pending</code> | <code>sent</code></td></tr>
+    <tr><td><code>created_at, sent_at</code></td><td>Carimbos</td></tr>
+  </table>
+  <p>Idempotência: <code>unique (profile_id, apify_post_id, recipient_user_id)</code>.</p>
+  <h4>O que o sistema de envio deve fazer</h4>
+  <pre><code>select * from linkedin_monitor_events where status = 'pending';
+-- montar a mensagem com profile_name + post_excerpt + post_url
+-- enviar para a coluna whatsapp
+update linkedin_monitor_events
+   set status = 'sent', sent_at = now()
+ where id = ...;</code></pre>
+</section>
+
+<!-- ===================== DADOS ===================== -->
+<section id="dados">
+  <h2>Modelo de dados</h2>
+  <p class="path">supabase/migrations/*.sql · todas as tabelas no schema public</p>
+
+  <h3>Dados de LinkedIn</h3>
+  <table>
+    <tr><th>Tabela</th><th>Propósito</th><th>Colunas-chave</th></tr>
+    <tr><td><code>linkedin_profiles</code></td><td>Pessoa ou empresa rastreada</td><td>id, profile_url, profile_type, user_id, company_profile_id, monitor_enabled, last_monitored_post_id</td></tr>
+    <tr><td><code>linkedin_posts</code></td><td>Posts de cada perfil</td><td>profile_id, user_id, posted_at, text_content, reactions_count, raw</td></tr>
+    <tr><td><code>linkedin_profile_reactions</code></td><td>Reações que o perfil deu</td><td>profile_id, apify_reaction_id, post_url, post_author_name</td></tr>
+    <tr><td><code>linkedin_profile_comments</code></td><td>Comentários que o perfil fez</td><td>profile_id, apify_comment_id, commentary, parent_post_url</td></tr>
+    <tr><td><code>linkedin_company_employees</code></td><td>Funcionários de uma empresa</td><td>profile_id, apify_employee_id, full_name, tracked_profile_id</td></tr>
+    <tr><td><code>linkedin_tags</code></td><td>Tags do usuário</td><td>user_id, name (unique por user)</td></tr>
+    <tr><td><code>linkedin_profile_tags</code></td><td>Perfil ↔ tag</td><td>profile_id, tag_id, user_id</td></tr>
+  </table>
+
+  <h3>Auth, billing e auditoria</h3>
+  <table>
+    <tr><th>Tabela</th><th>Propósito</th><th>Colunas-chave</th></tr>
+    <tr><td><code>linkedin_users_meta</code></td><td>Extensão do usuário</td><td>user_id (PK), full_name, plan_tier, subscription_until, whatsapp, locale</td></tr>
+    <tr><td><code>linkedin_payments</code></td><td>Cobranças PIX</td><td>user_id, plan_tier, amount_cents, status, abacate_pix_id, paid_at</td></tr>
+    <tr><td><code>linkedin_sync_log</code></td><td>Auditoria de cada chamada Apify</td><td>user_id, profile_id, sync_type, items_returned, cost_micro_usd</td></tr>
+    <tr><td><code>linkedin_scrape_cache</code></td><td>Cache global de scrape</td><td>canonical_url, sync_type, payload, fetched_at (só service-role)</td></tr>
+    <tr><td><code>linkedin_monitor_events</code></td><td>Fila de alertas (outbox)</td><td>profile_id, apify_post_id, recipient_user_id, whatsapp, status (só service-role)</td></tr>
+  </table>
+
+  <h3>Multi-tenant</h3>
+  <table>
+    <tr><th>Tabela</th><th>Propósito</th><th>Colunas-chave</th></tr>
+    <tr><td><code>organizations</code></td><td>Workspace corporativa</td><td>owner_id, name</td></tr>
+    <tr><td><code>org_members</code></td><td>Membros da org</td><td>org_id, user_id, role</td></tr>
+    <tr><td><code>org_invites</code></td><td>Convites pendentes</td><td>org_id, email, token, status</td></tr>
+    <tr><td><code>app_users</code></td><td>Liga uma identidade (auth.users) ao app que ela usa</td><td>user_id, app ('lia') · escopa quem é usuário do LIA na base compartilhada</td></tr>
+  </table>
+
+  <h3>Função e provisionamento</h3>
+  <ul class="tight">
+    <li><code>lia_workspace_ids()</code>: SET de user_ids visíveis (próprio + donos das orgs em que é membro). Base de toda RLS por workspace.</li>
+    <li>Provisionamento do usuário do LIA é <em>lazy</em> via <code>ensureLiaUser()</code> (<span class="path">lib/ensure-lia-user.ts</span>): upsert em <code>app_users</code> e <code>linkedin_users_meta</code> no primeiro acesso (a base é compartilhada com o fotofocinho, então não há trigger global de signup só pro LIA).</li>
+    <li>Storage: bucket público <code>avatars</code> guarda cópias dos avatares/logos (as URLs do LinkedIn expiram e bloqueiam hotlink).</li>
+  </ul>
+</section>
+
+<!-- ===================== I18N ===================== -->
+<section id="i18n">
+  <h2>Internacionalização</h2>
+  <p class="path">lib/i18n/*</p>
+  <ul class="tight">
+    <li>Idiomas: <code>pt</code> (padrão) e <code>en</code>. A <strong>UI do app é em inglês</strong> por convenção do projeto; o dicionário pt existe para o público brasileiro.</li>
+    <li>Dicionários aninhados em <span class="path">lib/i18n/dictionaries.ts</span> (namespaces: nav, account, landing, auth, home, common, billing, feed, timeline, profile).</li>
+    <li>Resolução do idioma (<span class="path">lib/i18n/server.ts</span>): preferência salva do usuário &gt; cookie <code>lia_locale</code> &gt; geo-IP / Accept-Language &gt; padrão.</li>
+    <li>Cliente: <code>useDict()</code>, <code>useLocale()</code> via <code>I18nProvider</code> (<span class="path">lib/i18n/client.tsx</span>). Troca de idioma chama <code>POST /api/locale</code>.</li>
+  </ul>
+</section>
+
+<!-- ===================== ENV ===================== -->
+<section id="env">
+  <h2>Variáveis de ambiente</h2>
+  <p class="path">Referência: .env.example · valores reais ficam no .env.local (dev) e no Netlify (produção)</p>
+  <div class="note good">Este doc lista só os <strong>nomes</strong> das variáveis, nunca os valores.</div>
+
+  <h3>Supabase</h3>
+  <ul class="tight">
+    <li><code>NEXT_PUBLIC_SUPABASE_URL</code></li>
+    <li><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
+    <li><code>SUPABASE_SERVICE_ROLE_KEY</code></li>
+  </ul>
+  <h3>Apify</h3>
+  <ul class="tight">
+    <li><code>APIFY_TOKEN</code></li>
+    <li><code>APIFY_POSTS_ACTOR_ID</code>, <code>APIFY_PROFILE_ACTOR_ID</code>, <code>APIFY_REACTIONS_ACTOR_ID</code>, <code>APIFY_COMMENTS_ACTOR_ID</code></li>
+    <li><code>APIFY_COMPANY_ACTOR_ID</code>, <code>APIFY_COMPANY_POSTS_ACTOR_ID</code>, <code>APIFY_COMPANY_EMPLOYEES_ACTOR_ID</code></li>
+    <li><code>APIFY_MAX_POSTS</code>, <code>APIFY_MAX_REACTIONS</code>, <code>APIFY_MAX_COMMENTS</code>, <code>APIFY_MAX_EMPLOYEES</code></li>
+  </ul>
+  <h3>Pagamento</h3>
+  <ul class="tight"><li><code>ABACATEPAY_API_KEY</code></li></ul>
+  <h3>App, cache e cron</h3>
+  <ul class="tight">
+    <li><code>NEXT_PUBLIC_APP_URL</code></li>
+    <li><code>ADMIN_EMAILS</code> (allowlist de quem acessa <code>/admin</code>)</li>
+    <li><code>SCRAPE_CACHE_TTL_HOURS</code></li>
+    <li><code>CRON_SECRET</code> (protege <code>/api/cron/monitor</code>)</li>
+  </ul>
+</section>
+
+<!-- ===================== LOCAL ===================== -->
+<section id="local">
+  <h2>Rodar local</h2>
+  <p>O ambiente local usa Supabase via Docker. Scripts em <span class="path">package.json</span>.</p>
+  <pre><code># 1. instalar dependências (rodar você mesmo; o fluxo não roda npm install automático)
+npm install
+
+# 2. subir o Supabase local (precisa do Docker Desktop)
+npm run db:start        # API 54331 · DB 54332 · Studio 54333
+
+# 3. aplicar todas as migrations no banco local
+npm run db:reset
+
+# 4. subir o dev server
+npm run dev             # http://localhost:3000
+
+# parar o Supabase
+npm run db:stop</code></pre>
+  <ul class="tight">
+    <li>Config local em <span class="path">supabase/config.toml</span> (project_id "linkedin", Postgres 15).</li>
+    <li>Studio do Supabase (UI do banco): <code>http://127.0.0.1:54333</code>.</li>
+    <li>O <code>.env.local</code> aponta para o Supabase local por padrão.</li>
+  </ul>
+</section>
+
+<!-- ===================== DEPLOY ===================== -->
+<section id="deploy">
+  <h2>Deploy & migrations</h2>
+  <h3>Deploy (Netlify)</h3>
+  <ul class="tight">
+    <li>Site: <strong>lia-analise</strong> (o subdomínio não pode conter "linkedin", marca registrada).</li>
+    <li>Repo: <code>pedroccm/linkedin-analise</code>, branch <code>master</code>. Deploy automático a cada push (CI do Netlify).</li>
+    <li>Produção usa a base Supabase da nuvem (compartilhada com o fotofocinho), com as env vars definidas no painel do Netlify.</li>
+  </ul>
+
+  <h3>Aplicar migration na nuvem</h3>
+  <p>Via Supabase CLI com a connection string da base (a senha fica fora deste doc):</p>
+  <pre><code>npx supabase db push --db-url \
+  "postgresql://postgres:&lt;SENHA&gt;@db.iynirubuonhsnxzzmrry.supabase.co:5432/postgres"</code></pre>
+  <div class="note warn">Como a base é compartilhada com o fotofocinho, o histórico remoto contém migrations do fotofocinho. Para o push não reclamar de "remote migration not found in local", os arquivos de migration do fotofocinho (timestamps <code>20260301*</code>) precisam estar copiados em <span class="path">supabase/migrations/</span> do LIA. O push aplica só as migrations novas.</div>
+</section>
+
+<!-- ===================== ADMIN ===================== -->
+<section id="admin">
+  <h2>Área admin</h2>
+  <p class="path">app/admin/* · lib/admin.ts</p>
+  <p>Acesso restrito por <code>isAdminEmail()</code>, que compara o email contra a allowlist <code>ADMIN_EMAILS</code>. A proteção é em três camadas: no layout (<code>/admin/**</code> retorna 404 para não-admin), nas server actions (<code>requireAdmin()</code>) e em rechecagem na página de uso.</p>
+  <table>
+    <tr><th>Rota</th><th>O que mostra</th></tr>
+    <tr><td><code>/admin</code></td><td>Dashboard: MRR, receita 30d, receita total, margem bruta, usuários (total/novos/ativos), custo Apify 30d, PIX pendente, conversão</td></tr>
+    <tr><td><code>/admin/users</code></td><td>Lista de usuários (email, signup, plano, validade, nº de perfis) com botão de sync por usuário</td></tr>
+    <tr><td><code>/admin/users/[id]</code></td><td>Detalhe do usuário + ações: estender assinatura (7/30/90/365 dias) e mudar plano. Tabelas de perfis, pagamentos e últimos 50 syncs</td></tr>
+    <tr><td><code>/admin/payments</code></td><td>Histórico de pagamentos (filtro por status, até 500)</td></tr>
+    <tr><td><code>/admin/usage</code></td><td>Uso por usuário: syncs 30d, custo Apify em USD/BRL</td></tr>
+    <tr><td><code>/admin/logs</code></td><td>Log de chamadas Apify (filtros por período, tipo e email) com custo por evento</td></tr>
+  </table>
+  <h4>Server actions (app/admin/actions.ts)</h4>
+  <ul class="tight">
+    <li><code>extendSubscription</code>: estende <code>subscription_until</code> (a partir da data atual da assinatura, ou de agora). Se o usuário estava free, assume Starter.</li>
+    <li><code>setPlanTier</code>: muda o plano; se free, limpa a validade.</li>
+  </ul>
+</section>
+
+<hr>
+<p class="path" style="text-align:center">LIA · documentação de referência · v0.2.0 · 2026-05-30</p>
+
+</main>
+</div>
+
+<script>
+  // Scrollspy: realça o item da navegação da seção visível.
+  const links = Array.from(document.querySelectorAll('nav.side a'));
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const a = map.get(e.target.id);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+  document.querySelectorAll('main section').forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
