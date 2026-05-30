@@ -4,15 +4,14 @@ import { useMemo, useState } from "react";
 import { useDict } from "@/lib/i18n/client";
 import type { TimelineRow, TimelineKind } from "@/app/timeline/timeline-item";
 
-const SNIPPET = 160;
+const LIMIT = 400;
 
 function clean(text: string | null | undefined): string {
-  return (text ?? "").replace(/\s+/g, " ").trim();
+  return (text ?? "").replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
 }
 
-// Compact, day-grouped activity timeline for a single person.
-// Filters by kind client-side; the date shows once per day, each event just has
-// its time + verb + a snippet of the relevant post.
+// Day-grouped activity timeline for a single person. Real checkboxes filter by
+// kind (client-side); each event is a readable card: time + verb + the post text.
 export function PersonTimeline({ rows }: { rows: TimelineRow[] }) {
   const dict = useDict();
   const tl = dict.timeline;
@@ -60,22 +59,20 @@ export function PersonTimeline({ rows }: { rows: TimelineRow[] }) {
   return (
     <div className="space-y-5">
       {/* Filters */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-5 flex-wrap pb-3 border-b border-[var(--color-border)]">
         {filters.map(({ k, label }) => (
-          <button
+          <label
             key={k}
-            type="button"
-            onClick={() => setShow((s) => ({ ...s, [k]: !s[k] }))}
-            className={
-              "text-sm px-3 py-1.5 rounded-full border transition-colors " +
-              (show[k]
-                ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white"
-                : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-white")
-            }
+            className="flex items-center gap-2 text-sm cursor-pointer select-none"
           >
-            <span className="mr-1">{show[k] ? "✓" : "+"}</span>
+            <input
+              type="checkbox"
+              checked={show[k]}
+              onChange={() => setShow((s) => ({ ...s, [k]: !s[k] }))}
+              className="w-4 h-4 accent-[var(--color-accent)]"
+            />
             {label}
-          </button>
+          </label>
         ))}
       </div>
 
@@ -87,13 +84,13 @@ export function PersonTimeline({ rows }: { rows: TimelineRow[] }) {
 
       {/* Day groups */}
       {groups.map((g) => (
-        <div key={g.label} className="space-y-1.5">
-          <div className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)] pb-1 border-b border-[var(--color-border)]">
+        <div key={g.label} className="space-y-2">
+          <div className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
             {g.label}
           </div>
-          <ul>
+          <ul className="grid gap-2">
             {g.rows.map((r) => (
-              <Row key={r.key} row={r} tl={tl} />
+              <Row key={r.key} row={r} tl={tl} more={dict.common.showMore} less={dict.common.showLess} />
             ))}
           </ul>
         </div>
@@ -102,7 +99,19 @@ export function PersonTimeline({ rows }: { rows: TimelineRow[] }) {
   );
 }
 
-function Row({ row, tl }: { row: TimelineRow; tl: ReturnType<typeof useDict>["timeline"] }) {
+function Row({
+  row,
+  tl,
+  more,
+  less,
+}: {
+  row: TimelineRow;
+  tl: ReturnType<typeof useDict>["timeline"];
+  more: string;
+  less: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
   const time = row.occurredAt
     ? new Date(row.occurredAt).toLocaleTimeString(undefined, {
         hour: "2-digit",
@@ -117,42 +126,71 @@ function Row({ row, tl }: { row: TimelineRow; tl: ReturnType<typeof useDict>["ti
       ? { icon: "💬", text: tl.commentedOn, cls: "text-[var(--color-accent-2)]" }
       : { icon: "📝", text: tl.posted, cls: "text-[var(--color-success)]" };
 
-  const raw =
+  const full = clean(
     row.kind === "post"
       ? row.postText
       : row.kind === "comment"
       ? row.postContent || row.commentary
-      : row.postContent;
-  const full = clean(raw);
-  const snippet = full.length > SNIPPET ? full.slice(0, SNIPPET).trimEnd() + "…" : full;
+      : row.postContent
+  );
+  const isLong = full.length > LIMIT;
+  const visible = expanded || !isLong ? full : full.slice(0, LIMIT).trimEnd() + "…";
 
   return (
-    <li className="flex gap-3 py-1.5 border-b border-[var(--color-border)] last:border-0">
-      <span className="text-xs text-[var(--color-text-muted)] tabular-nums shrink-0 w-12 pt-0.5">
-        {time}
-      </span>
-      <div className="min-w-0 text-sm leading-snug">
-        <span className={`font-medium ${verb.cls}`}>
+    <li className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-4">
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-[var(--color-text-muted)] tabular-nums">
+          {time}
+        </span>
+        <span className={`text-sm font-medium ${verb.cls}`}>
           {verb.icon} {verb.text}
         </span>
-        {snippet && (
-          <>
-            {" "}
-            {row.postUrl ? (
-              <a
-                href={row.postUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[var(--color-text-muted)] no-underline hover:text-white"
-              >
-                {snippet}
-              </a>
-            ) : (
-              <span className="text-[var(--color-text-muted)]">{snippet}</span>
-            )}
-          </>
+        {row.kind === "post" && (row.likes || row.comments || row.reposts) ? (
+          <span className="ml-auto text-xs text-[var(--color-text-muted)] flex gap-3">
+            <span>❤ {row.likes ?? 0}</span>
+            <span>💬 {row.comments ?? 0}</span>
+            <span>🔁 {row.reposts ?? 0}</span>
+          </span>
+        ) : (
+          row.postUrl && (
+            <a
+              href={row.postUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="ml-auto text-xs text-[var(--color-text-muted)] hover:text-white no-underline shrink-0"
+            >
+              abrir ↗
+            </a>
+          )
         )}
       </div>
+
+      {full && (
+        <div className="mt-2 text-sm leading-relaxed whitespace-pre-wrap">
+          {visible}
+          {isLong && (
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="block mt-1 text-xs text-[var(--color-accent-2)] hover:underline"
+            >
+              {expanded ? less : more}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* For posts, the open link goes below since the header shows counts */}
+      {row.kind === "post" && row.postUrl && (
+        <a
+          href={row.postUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-block mt-2 text-xs text-[var(--color-text-muted)] hover:text-white no-underline"
+        >
+          abrir ↗
+        </a>
+      )}
     </li>
   );
 }
