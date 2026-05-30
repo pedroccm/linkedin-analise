@@ -2,6 +2,53 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { pickDate, pickNumber, runApifyActor } from "@/lib/apify";
 import { logSync } from "@/lib/sync-log";
 import { mirrorImage } from "@/lib/avatar-storage";
+import { createServiceClient } from "@/lib/supabase/server";
+import { canonicalLinkedinUrl } from "@/lib/canonical-url";
+
+const CACHE_TTL_MS =
+  Number(process.env.SCRAPE_CACHE_TTL_HOURS ?? 24) * 60 * 60 * 1000;
+
+// Returns cached Apify items for (canonical url, kind) when fresh; otherwise runs
+// the actor, caches the result, and returns it. Shares the expensive scrape across
+// all users/workspaces tracking the same profile.
+async function cachedActor<T>(
+  canonical: string,
+  kind: string,
+  run: () => Promise<T[]>
+): Promise<{ items: T[]; cached: boolean }> {
+  const admin = createServiceClient();
+
+  if (canonical) {
+    const { data: hit } = await admin
+      .from("linkedin_scrape_cache")
+      .select("payload, fetched_at")
+      .eq("canonical_url", canonical)
+      .eq("sync_type", kind)
+      .maybeSingle();
+    if (
+      hit &&
+      Date.now() - new Date(hit.fetched_at).getTime() < CACHE_TTL_MS
+    ) {
+      return { items: (hit.payload as T[]) ?? [], cached: true };
+    }
+  }
+
+  const items = await run();
+
+  if (canonical) {
+    await admin.from("linkedin_scrape_cache").upsert(
+      {
+        canonical_url: canonical,
+        sync_type: kind,
+        payload: items,
+        fetched_at: new Date().toISOString(),
+      },
+      { onConflict: "canonical_url,sync_type" }
+    );
+  }
+
+  return { items, cached: false };
+}
 
 // ===== Shared types =====
 
@@ -260,8 +307,11 @@ export async function syncDetailsAndPosts(opts: {
 
   let posts: ApifyPost[] = [];
   let details: ApifyPerson | ApifyCompany | null = null;
+  let postsCached = false;
+  let detailsCached = false;
   const errors: string[] = [];
 
+  const canonical = canonicalLinkedinUrl(profile.profile_url);
   const postsInput = { targetUrls: [profile.profile_url], maxPosts };
   const detailsInput = isCompany
     ? { companies: [profile.profile_url] }
@@ -271,14 +321,22 @@ export async function syncDetailsAndPosts(opts: {
       };
 
   await Promise.all([
-    runApifyActor<ApifyPost>(postsActor, postsInput)
-      .then((items) => {
-        posts = items;
+    cachedActor<ApifyPost>(canonical, isCompany ? "company_posts" : "posts", () =>
+      runApifyActor<ApifyPost>(postsActor, postsInput)
+    )
+      .then((r) => {
+        posts = r.items;
+        postsCached = r.cached;
       })
       .catch((err) => errors.push(`posts: ${err.message}`)),
-    runApifyActor<ApifyPerson | ApifyCompany>(detailsActor, detailsInput)
-      .then((items) => {
-        details = items[0] ?? null;
+    cachedActor<ApifyPerson | ApifyCompany>(
+      canonical,
+      isCompany ? "company" : "details",
+      () => runApifyActor<ApifyPerson | ApifyCompany>(detailsActor, detailsInput)
+    )
+      .then((r) => {
+        details = r.items[0] ?? null;
+        detailsCached = r.cached;
       })
       .catch((err) => errors.push(`details: ${err.message}`)),
   ]);
@@ -392,6 +450,7 @@ export async function syncDetailsAndPosts(opts: {
     profileId: profile.id,
     syncType: "details_posts",
     itemsReturned: posts.length,
+    cached: postsCached && detailsCached,
   });
 
   return {
@@ -413,10 +472,15 @@ export async function syncReactions(opts: {
     process.env.APIFY_REACTIONS_ACTOR_ID ?? "harvestapi~linkedin-profile-reactions";
   const maxItems = Number(process.env.APIFY_MAX_REACTIONS ?? 50);
 
-  const items = await runApifyActor<ApifyReaction>(actorId, {
-    profiles: [profile.profile_url],
-    maxItems,
-  });
+  const { items, cached } = await cachedActor<ApifyReaction>(
+    canonicalLinkedinUrl(profile.profile_url),
+    "reactions",
+    () =>
+      runApifyActor<ApifyReaction>(actorId, {
+        profiles: [profile.profile_url],
+        maxItems,
+      })
+  );
 
   const rows = items.map((r) => ({
     profile_id: profile.id,
@@ -466,6 +530,7 @@ export async function syncReactions(opts: {
     profileId: profile.id,
     syncType: "reactions",
     itemsReturned: items.length,
+    cached,
   });
 
   return { inserted, total: total ?? 0 };
@@ -482,10 +547,15 @@ export async function syncComments(opts: {
     process.env.APIFY_COMMENTS_ACTOR_ID ?? "harvestapi~linkedin-profile-comments";
   const maxItems = Number(process.env.APIFY_MAX_COMMENTS ?? 50);
 
-  const items = await runApifyActor<ApifyComment>(actorId, {
-    profiles: [profile.profile_url],
-    maxItems,
-  });
+  const { items, cached } = await cachedActor<ApifyComment>(
+    canonicalLinkedinUrl(profile.profile_url),
+    "comments",
+    () =>
+      runApifyActor<ApifyComment>(actorId, {
+        profiles: [profile.profile_url],
+        maxItems,
+      })
+  );
 
   const rows = items.map((c) => ({
     profile_id: profile.id,
@@ -530,6 +600,7 @@ export async function syncComments(opts: {
     profileId: profile.id,
     syncType: "comments",
     itemsReturned: items.length,
+    cached,
   });
 
   return { inserted, total: total ?? 0 };
@@ -550,12 +621,17 @@ export async function syncEmployees(opts: {
   const maxItems = Number(process.env.APIFY_MAX_EMPLOYEES ?? 100);
   const takePages = Math.max(1, Math.ceil(maxItems / 25));
 
-  const items = await runApifyActor<ApifyEmployee>(actorId, {
-    companies: [profile.profile_url],
-    profileScraperMode: "Short ($4 per 1k)",
-    maxItems,
-    takePages,
-  });
+  const { items, cached } = await cachedActor<ApifyEmployee>(
+    canonicalLinkedinUrl(profile.profile_url),
+    "employees",
+    () =>
+      runApifyActor<ApifyEmployee>(actorId, {
+        companies: [profile.profile_url],
+        profileScraperMode: "Short ($4 per 1k)",
+        maxItems,
+        takePages,
+      })
+  );
 
   const rows = items.map((e) => {
     const fullName =
@@ -614,6 +690,7 @@ export async function syncEmployees(opts: {
     profileId: profile.id,
     syncType: "company_employees",
     itemsReturned: items.length,
+    cached,
   });
 
   return { inserted, total: total ?? 0 };

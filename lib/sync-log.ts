@@ -17,9 +17,15 @@ export async function logSync(params: {
   profileId: string | null;
   syncType: SyncType;
   itemsReturned: number;
+  cached?: boolean;
 }) {
-  let cost = APIFY_COST_PER_ITEM[params.syncType] * params.itemsReturned;
-  if (params.syncType === "details_posts") cost += DETAILS_FIXED_COST_MICRO_USD;
+  // A cache hit means no Apify call happened → zero cost.
+  let cost = params.cached
+    ? 0
+    : APIFY_COST_PER_ITEM[params.syncType] * params.itemsReturned;
+  if (!params.cached && params.syncType === "details_posts") {
+    cost += DETAILS_FIXED_COST_MICRO_USD;
+  }
 
   const admin = createServiceClient();
   await admin.from("linkedin_sync_log").insert({
