@@ -49,39 +49,28 @@ export function FilterBar({
   }
 
   return (
-    <div className="flex flex-wrap gap-3 items-center">
-      <div className="flex-1 min-w-[200px]">
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={c.searchPlaceholder}
-          className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm outline-none focus:border-[var(--color-accent-2)]"
-        />
-      </div>
-      <div className="flex gap-1 flex-wrap">
-        {DATE_PRESETS.map((d) => {
-          const isActive = d.key === currentRange;
-          return (
-            <button
-              key={d.key || "all"}
-              type="button"
-              onClick={() => setRange(d.key)}
-              className={
-                "text-xs px-3 py-1.5 rounded-full border transition-colors " +
-                (isActive
-                  ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white"
-                  : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-white hover:border-[var(--color-accent-2)]")
-              }
-            >
-              {d.label}
-            </button>
-          );
-        })}
-      </div>
+    <>
+      <input
+        type="search"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder={c.searchPlaceholder}
+        className="flex-1 min-w-[180px] bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm outline-none focus:border-[var(--color-accent-2)]"
+      />
+      <select
+        value={currentRange}
+        onChange={(e) => setRange(e.target.value)}
+        className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--color-accent-2)]"
+      >
+        {DATE_PRESETS.map((d) => (
+          <option key={d.key || "all"} value={d.key}>
+            {d.label}
+          </option>
+        ))}
+      </select>
       {isPending && (
         <span className="text-xs text-[var(--color-text-muted)]">{c.filtering}</span>
       )}
-    </div>
+    </>
   );
 }

@@ -35,14 +35,11 @@ export function CompanyFilter({
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <label className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">
-        {t.company}
-      </label>
+    <div className="flex items-center gap-1">
       <select
         value={currentCompanyId}
         onChange={(e) => setCompany(e.target.value)}
-        className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--color-accent-2)]"
+        className="max-w-[180px] bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--color-accent-2)]"
       >
         <option value="">{t.allCompanies}</option>
         {companies.map((c) => (

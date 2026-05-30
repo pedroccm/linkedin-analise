@@ -1,20 +1,13 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { FeedPostItem } from "../profiles/[id]/feed-post-item";
 import { CompanyFilter } from "./company-filter";
 import { TagFilter } from "./tag-filter";
 import { FilterBar } from "./filter-bar";
-import { SortPills, type GlobalSortKey } from "./sort-pills";
+import { SortSelect, type GlobalSortKey } from "./sort-pills";
+import { FeedList } from "./feed-list";
 import { getServerI18n } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
-
-const SORT_CONFIG: Record<GlobalSortKey, { column: string; ascending: boolean }> = {
-  recent: { column: "posted_at", ascending: false },
-  likes: { column: "reactions_count", ascending: false },
-  comments: { column: "comments_count", ascending: false },
-  reposts: { column: "reposts_count", ascending: false },
-};
 
 function parseSort(raw: string | string[] | undefined): GlobalSortKey {
   const v = Array.isArray(raw) ? raw[0] : raw;
@@ -107,7 +100,6 @@ export default async function FeedPage({
     authorFilter = [...sets[0]].filter((id) => sets.every((s) => s.has(id)));
   }
 
-  const { column, ascending } = SORT_CONFIG[sort];
   let postsQuery = supabase
     .from("linkedin_posts")
     .select(
@@ -120,8 +112,9 @@ export default async function FeedPage({
   if (since) postsQuery = postsQuery.gte("posted_at", since);
   if (query.trim()) postsQuery = postsQuery.ilike("text_content", `%${query.trim()}%`);
 
-  const { data: rawPosts } = await postsQuery.order(column, {
-    ascending,
+  // Always fetch newest-first; FeedList groups by day and applies the sort within each day.
+  const { data: rawPosts } = await postsQuery.order("posted_at", {
+    ascending: false,
     nullsFirst: false,
   });
 
@@ -138,19 +131,16 @@ export default async function FeedPage({
         <p className="text-[var(--color-text-muted)] text-sm">{t.subtitle}</p>
       </section>
 
-      <section className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <CompanyFilter
-            companies={companies ?? []}
-            currentCompanyId={companyId}
-            basePath="/feed"
-          />
-          <TagFilter tags={tags ?? []} currentTagId={tagId} basePath="/feed" />
-        </div>
-        <SortPills basePath="/feed" currentSort={sort} />
+      <section className="flex flex-wrap items-center gap-2">
+        <FilterBar basePath="/feed" currentRange={range} currentQuery={query} />
+        <CompanyFilter
+          companies={companies ?? []}
+          currentCompanyId={companyId}
+          basePath="/feed"
+        />
+        <TagFilter tags={tags ?? []} currentTagId={tagId} basePath="/feed" />
+        <SortSelect basePath="/feed" currentSort={sort} />
       </section>
-
-      <FilterBar basePath="/feed" currentRange={range} currentQuery={query} />
 
       <p className="text-xs text-[var(--color-text-muted)]">
         {posts.length} {t.postsCount}
@@ -160,11 +150,7 @@ export default async function FeedPage({
         <p className="text-[var(--color-text-muted)] text-sm">{t.empty}</p>
       )}
 
-      <ul className="grid gap-3">
-        {posts.map((p) => (
-          <FeedPostItem key={p.id} post={p} />
-        ))}
-      </ul>
+      <FeedList posts={posts} sort={sort} />
     </div>
   );
 }

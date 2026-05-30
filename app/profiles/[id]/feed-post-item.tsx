@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDict } from "@/lib/i18n/client";
-import { fmtDateTime } from "@/lib/format";
+import { fmtDateTime, fmtTime } from "@/lib/format";
 
 type Author = {
   id: string;
@@ -27,7 +27,13 @@ type FeedPost = {
 
 const COLLAPSED_CHAR_LIMIT = 240;
 
-export function FeedPostItem({ post }: { post: FeedPost }) {
+export function FeedPostItem({
+  post,
+  timeOnly = false,
+}: {
+  post: FeedPost;
+  timeOnly?: boolean;
+}) {
   const [expanded, setExpanded] = useState(false);
   const dict = useDict();
   const c = dict.common;
@@ -77,9 +83,10 @@ export function FeedPostItem({ post }: { post: FeedPost }) {
                 {post.author.profile_type}
               </span>
               {post.posted_at && (
-                <span>{fmtDateTime(post.posted_at)}</span>
+                <span>
+                  {timeOnly ? fmtTime(post.posted_at) : fmtDateTime(post.posted_at)}
+                </span>
               )}
-              {post.post_type && <span>· {post.post_type}</span>}
             </div>
           </div>
           {post.post_url && (
