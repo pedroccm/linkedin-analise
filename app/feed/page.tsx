@@ -15,19 +15,6 @@ function parseSort(raw: string | string[] | undefined): GlobalSortKey {
   return "recent";
 }
 
-function rangeStartISO(range: string): string | null {
-  const now = new Date();
-  const d = new Date(now);
-  switch (range) {
-    case "30d": d.setDate(now.getDate() - 30); break;
-    case "90d": d.setDate(now.getDate() - 90); break;
-    case "6m":  d.setMonth(now.getMonth() - 6); break;
-    case "1y":  d.setFullYear(now.getFullYear() - 1); break;
-    default: return null;
-  }
-  return d.toISOString();
-}
-
 type RawAuthor = {
   id: string;
   full_name: string | null;
@@ -62,7 +49,6 @@ export default async function FeedPage({
 
   const sp = await searchParams;
   const sort = parseSort(sp.sort);
-  const range = typeof sp.range === "string" ? sp.range : "";
   const query = typeof sp.q === "string" ? sp.q : "";
   const companyId = typeof sp.company === "string" ? sp.company : "";
   const tagId = typeof sp.tag === "string" ? sp.tag : "";
@@ -108,8 +94,6 @@ export default async function FeedPage({
     );
 
   if (authorFilter) postsQuery = postsQuery.in("profile_id", authorFilter);
-  const since = rangeStartISO(range);
-  if (since) postsQuery = postsQuery.gte("posted_at", since);
   if (query.trim()) postsQuery = postsQuery.ilike("text_content", `%${query.trim()}%`);
 
   // Always fetch newest-first; FeedList groups by day and applies the sort within each day.
@@ -132,7 +116,7 @@ export default async function FeedPage({
       </section>
 
       <section className="flex flex-wrap items-center gap-2">
-        <FilterBar basePath="/feed" currentRange={range} currentQuery={query} />
+        <FilterBar basePath="/feed" currentQuery={query} showRange={false} />
         <CompanyFilter
           companies={companies ?? []}
           currentCompanyId={companyId}

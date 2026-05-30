@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { FeedPostItem } from "../profiles/[id]/feed-post-item";
 import { fmtDay } from "@/lib/format";
+import { useLocale } from "@/lib/i18n/client";
 import type { GlobalSortKey } from "./sort-pills";
 
 type Author = {
@@ -34,6 +35,7 @@ export function FeedList({
   posts: FeedListPost[];
   sort: GlobalSortKey;
 }) {
+  const locale = useLocale();
   const groups = useMemo(() => {
     const cmp = (a: FeedListPost, b: FeedListPost): number => {
       if (sort === "likes")
@@ -55,14 +57,15 @@ export function FeedList({
             d.getDate()
           ).padStart(2, "0")}`
         : "0000-z-none";
-      if (!map.has(key)) map.set(key, { label: fmtDay(p.posted_at), rows: [] });
+      if (!map.has(key))
+        map.set(key, { label: fmtDay(p.posted_at, locale), rows: [] });
       map.get(key)!.rows.push(p);
     }
 
     return [...map.entries()]
       .sort((a, b) => (a[0] < b[0] ? 1 : a[0] > b[0] ? -1 : 0))
       .map(([, v]) => ({ label: v.label, rows: [...v.rows].sort(cmp) }));
-  }, [posts, sort]);
+  }, [posts, sort, locale]);
 
   return (
     <div className="space-y-5">

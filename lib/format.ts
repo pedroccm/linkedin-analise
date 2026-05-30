@@ -18,17 +18,19 @@ export function fmtTime(
   return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 }
 
-// Day header label (e.g. "qui, 13 mar 2026").
+// Day header label following the app language, without the year (e.g. "qui, 13 mar").
 export function fmtDay(
-  value: string | number | Date | null | undefined
+  value: string | number | Date | null | undefined,
+  locale?: string
 ): string {
   if (value == null) return "—";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString(undefined, {
+  const loc =
+    locale === "pt" ? "pt-BR" : locale === "en" ? "en-US" : locale || undefined;
+  return d.toLocaleDateString(loc, {
     weekday: "short",
     day: "numeric",
     month: "short",
-    year: "numeric",
   });
 }

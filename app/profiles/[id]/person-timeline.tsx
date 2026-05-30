@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useDict } from "@/lib/i18n/client";
+import { useDict, useLocale } from "@/lib/i18n/client";
+import { fmtDay } from "@/lib/format";
 import { activityVerb } from "@/app/timeline/timeline-item";
 import type { TimelineRow, TimelineKind } from "@/app/timeline/timeline-item";
 
@@ -24,6 +25,7 @@ export function PersonTimeline({ rows }: { rows: TimelineRow[] }) {
     comment: true,
   });
 
+  const locale = useLocale();
   const filtered = useMemo(() => rows.filter((r) => show[r.kind]), [rows, show]);
 
   const groups = useMemo(() => {
@@ -35,21 +37,14 @@ export function PersonTimeline({ rows }: { rows: TimelineRow[] }) {
             d.getDate()
           ).padStart(2, "0")}`
         : "0000-z-none";
-      const label = d
-        ? d.toLocaleDateString(undefined, {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })
-        : "—";
-      if (!map.has(key)) map.set(key, { label, rows: [] });
+      if (!map.has(key))
+        map.set(key, { label: fmtDay(r.occurredAt, locale), rows: [] });
       map.get(key)!.rows.push(r);
     }
     return [...map.entries()]
       .sort((a, b) => (a[0] < b[0] ? 1 : a[0] > b[0] ? -1 : 0))
       .map(([, v]) => v);
-  }, [filtered]);
+  }, [filtered, locale]);
 
   const filters: Array<{ k: TimelineKind; label: string }> = [
     { k: "post", label: tp.tabPosts },

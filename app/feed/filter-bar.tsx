@@ -6,12 +6,14 @@ import { useDict } from "@/lib/i18n/client";
 
 export function FilterBar({
   basePath,
-  currentRange,
+  currentRange = "",
   currentQuery,
+  showRange = true,
 }: {
   basePath: string;
-  currentRange: string;
+  currentRange?: string;
   currentQuery: string;
+  showRange?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -57,17 +59,19 @@ export function FilterBar({
         placeholder={c.searchPlaceholder}
         className="flex-1 min-w-[180px] bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm outline-none focus:border-[var(--color-accent-2)]"
       />
-      <select
-        value={currentRange}
-        onChange={(e) => setRange(e.target.value)}
-        className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--color-accent-2)]"
-      >
-        {DATE_PRESETS.map((d) => (
-          <option key={d.key || "all"} value={d.key}>
-            {d.label}
-          </option>
-        ))}
-      </select>
+      {showRange && (
+        <select
+          value={currentRange}
+          onChange={(e) => setRange(e.target.value)}
+          className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[var(--color-accent-2)]"
+        >
+          {DATE_PRESETS.map((d) => (
+            <option key={d.key || "all"} value={d.key}>
+              {d.label}
+            </option>
+          ))}
+        </select>
+      )}
       {isPending && (
         <span className="text-xs text-[var(--color-text-muted)]">{c.filtering}</span>
       )}
