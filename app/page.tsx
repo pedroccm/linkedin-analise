@@ -60,7 +60,6 @@ export default async function Home() {
             className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] text-white font-medium px-5 py-2 rounded text-sm transition-colors"
           />
         </form>
-        <p className="text-xs text-[var(--color-text-muted)] mt-2">{t.companyHint}</p>
 
         {suggestions.length > 0 && (profiles?.length ?? 0) < 2 && (
           <div className="mt-4 pt-4 border-t border-[var(--color-border)]">

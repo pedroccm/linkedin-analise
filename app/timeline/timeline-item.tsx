@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDict } from "@/lib/i18n/client";
+import { fmtDateTime } from "@/lib/format";
 
 export type TimelineKind = "reaction" | "comment" | "post";
 
@@ -102,7 +103,7 @@ export function TimelineItem({ row }: { row: TimelineRow }) {
               ))}
             {row.occurredAt && (
               <span className="text-xs text-[var(--color-text-muted)]">
-                · {new Date(row.occurredAt).toLocaleString()}
+                · {fmtDateTime(row.occurredAt)}
               </span>
             )}
           </div>

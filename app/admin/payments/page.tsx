@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/plans";
+import { fmtDateTime } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -94,7 +95,7 @@ export default async function PaymentsPage({
                 className="border-t border-[var(--color-border)] hover:bg-[var(--color-bg-2)]"
               >
                 <td className="px-3 py-2 text-[var(--color-text-muted)] text-xs">
-                  {new Date(p.created_at).toLocaleString()}
+                  {fmtDateTime(p.created_at)}
                 </td>
                 <td className="px-3 py-2">
                   <Link
@@ -110,7 +111,7 @@ export default async function PaymentsPage({
                   <PaymentStatus status={p.status} />
                 </td>
                 <td className="px-3 py-2 text-right text-[var(--color-text-muted)] text-xs">
-                  {p.paid_at ? new Date(p.paid_at).toLocaleString() : "—"}
+                  {p.paid_at ? fmtDateTime(p.paid_at) : "—"}
                 </td>
               </tr>
             ))}

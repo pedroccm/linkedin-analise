@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
 import { microUsdToBrl, formatMicroUsd } from "@/lib/sync-log";
+import { fmtDateTime } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -265,7 +266,7 @@ export default async function LogsPage({
               return (
                 <tr key={r.id} className="border-t border-[var(--color-border)]">
                   <td className="px-3 py-2 text-[var(--color-text-muted)] text-xs whitespace-nowrap">
-                    {new Date(r.created_at).toLocaleString()}
+                    {fmtDateTime(r.created_at)}
                   </td>
                   <td className="px-3 py-2 truncate max-w-[200px]">
                     <Link

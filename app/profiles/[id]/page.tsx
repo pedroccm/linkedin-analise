@@ -549,8 +549,7 @@ async function ReactionsSection({ profileId, t }: { profileId: string; t: Profil
 
   return (
     <section className="space-y-3">
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-[var(--color-text-muted)]">{t.reactionsHint}</p>
+      <div className="flex justify-end items-center">
         <SyncButton
           endpoint={`/api/profiles/${profileId}/sync-reactions`}
           label={t.syncReactions}
@@ -581,8 +580,7 @@ async function CommentsSection({ profileId, t }: { profileId: string; t: Profile
 
   return (
     <section className="space-y-3">
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-[var(--color-text-muted)]">{t.commentsHint}</p>
+      <div className="flex justify-end items-center">
         <SyncButton
           endpoint={`/api/profiles/${profileId}/sync-comments`}
           label={t.syncComments}

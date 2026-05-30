@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useDict } from "@/lib/i18n/client";
+import { fmtDateTime } from "@/lib/format";
 
 type Reaction = {
   id: string;
@@ -38,7 +39,7 @@ export function ReactionItem({ reaction }: { reaction: Reaction }) {
           )}
           {reaction.reacted_at && (
             <span className="ml-2">
-              · {new Date(reaction.reacted_at).toLocaleString()}
+              · {fmtDateTime(reaction.reacted_at)}
             </span>
           )}
         </div>

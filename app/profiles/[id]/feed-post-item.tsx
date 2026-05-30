@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDict } from "@/lib/i18n/client";
+import { fmtDateTime } from "@/lib/format";
 
 type Author = {
   id: string;
@@ -76,7 +77,7 @@ export function FeedPostItem({ post }: { post: FeedPost }) {
                 {post.author.profile_type}
               </span>
               {post.posted_at && (
-                <span>{new Date(post.posted_at).toLocaleString()}</span>
+                <span>{fmtDateTime(post.posted_at)}</span>
               )}
               {post.post_type && <span>· {post.post_type}</span>}
             </div>

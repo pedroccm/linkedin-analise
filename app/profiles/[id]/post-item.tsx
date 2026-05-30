@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useDict } from "@/lib/i18n/client";
+import { fmtDateTime } from "@/lib/format";
 
 type Post = {
   id: string;
@@ -32,7 +33,7 @@ export function PostItem({ post }: { post: Post }) {
       <div className="flex items-center justify-between gap-4 text-xs text-[var(--color-text-muted)] mb-2">
         <div>
           {post.posted_at
-            ? new Date(post.posted_at).toLocaleString()
+            ? fmtDateTime(post.posted_at)
             : p.unknownDate}
           {post.post_type && <span className="ml-2">· {post.post_type}</span>}
         </div>

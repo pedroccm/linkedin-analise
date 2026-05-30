@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
 import { PLANS, formatPrice, type PlanTier } from "@/lib/plans";
 import { microUsdToBrl } from "@/lib/sync-log";
+import { fmtDateTime } from "@/lib/format";
 import { extendSubscription, setPlanTier } from "../../actions";
 
 export const dynamic = "force-dynamic";
@@ -83,7 +84,7 @@ export default async function UserDetailPage({
             <p className="text-xs text-[var(--color-text-muted)] mt-1">
               Signed up{" "}
               {authUser.created_at
-                ? new Date(authUser.created_at).toLocaleString()
+                ? fmtDateTime(authUser.created_at)
                 : "?"}{" "}
               · ID {authUser.id}
             </p>
@@ -236,7 +237,7 @@ export default async function UserDetailPage({
             {payments.map((p) => (
               <tr key={p.id} className="border-t border-[var(--color-border)]">
                 <td className="px-3 py-2 text-[var(--color-text-muted)] text-xs">
-                  {new Date(p.created_at).toLocaleString()}
+                  {fmtDateTime(p.created_at)}
                 </td>
                 <td className="px-3 py-2">{p.plan_tier}</td>
                 <td className="px-3 py-2 text-right">{formatPrice(p.amount_cents)}</td>
@@ -277,7 +278,7 @@ export default async function UserDetailPage({
             {syncs.map((s, idx) => (
               <tr key={idx} className="border-t border-[var(--color-border)]">
                 <td className="px-3 py-2 text-[var(--color-text-muted)] text-xs">
-                  {new Date(s.created_at).toLocaleString()}
+                  {fmtDateTime(s.created_at)}
                 </td>
                 <td className="px-3 py-2 text-xs">{s.sync_type}</td>
                 <td className="px-3 py-2 text-right">{s.items_returned}</td>

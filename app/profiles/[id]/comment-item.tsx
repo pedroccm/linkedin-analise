@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useDict } from "@/lib/i18n/client";
+import { fmtDateTime } from "@/lib/format";
 
 type Comment = {
   id: string;
@@ -41,7 +42,7 @@ export function CommentItem({ comment }: { comment: Comment }) {
           )}
           {comment.commented_at && (
             <span className="ml-2">
-              · {new Date(comment.commented_at).toLocaleString()}
+              · {fmtDateTime(comment.commented_at)}
             </span>
           )}
         </div>
