@@ -18,6 +18,9 @@ export type TimelineRow = {
     avatar: string | null;
     profileType: "person" | "company";
   } | null;
+  // Activity flags (a row can be both, when the actor liked AND commented the same post)
+  didLike?: boolean;
+  didComment?: boolean;
   // Reaction-only
   actionText?: string | null;
   // Comment-only
@@ -36,20 +39,36 @@ export type TimelineRow = {
 
 const LIMIT = 220;
 
+type Dict = ReturnType<typeof useDict>;
+
+// Verb descriptor for an activity row. A row can be a like, a comment, or both.
+export function activityVerb(
+  tl: Dict["timeline"],
+  didLike: boolean,
+  didComment: boolean
+): { icon: string; text: string; cls: string } {
+  if (didLike && didComment)
+    return {
+      icon: "💬❤",
+      text: tl.likedAndCommented,
+      cls: "text-[var(--color-accent-2)]",
+    };
+  if (didComment)
+    return { icon: "💬", text: tl.commentedOn, cls: "text-[var(--color-accent-2)]" };
+  return { icon: "❤", text: tl.liked, cls: "text-[var(--color-danger)]" };
+}
+
 export function TimelineItem({ row }: { row: TimelineRow }) {
   const [expanded, setExpanded] = useState(false);
   const dict = useDict();
   const tl = dict.timeline;
   const c = dict.common;
 
-  const verb =
-    row.kind === "reaction" ? (
-      <span className="text-[var(--color-danger)] font-medium">❤ {tl.liked}</span>
-    ) : row.kind === "comment" ? (
-      <span className="text-[var(--color-accent-2)] font-medium">💬 {tl.commentedOn}</span>
-    ) : (
-      <span className="text-[var(--color-success)] font-medium">📝 {tl.posted}</span>
-    );
+  const v =
+    row.kind === "post"
+      ? { icon: "📝", text: tl.posted, cls: "text-[var(--color-success)]" }
+      : activityVerb(tl, !!row.didLike, !!row.didComment);
+  const verb = <span className={`font-medium ${v.cls}`}>{v.icon} {v.text}</span>;
 
   const targetSnippet = row.postContent ?? "";
   const targetIsLong = targetSnippet.length > LIMIT;
@@ -109,7 +128,7 @@ export function TimelineItem({ row }: { row: TimelineRow }) {
           </div>
 
           {/* Comment text from the actor themselves */}
-          {row.kind === "comment" && row.commentary && (
+          {row.didComment && row.commentary && (
             <div className="mt-2 text-sm leading-relaxed whitespace-pre-wrap">
               {row.commentary}
             </div>

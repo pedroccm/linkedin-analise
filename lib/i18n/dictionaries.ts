@@ -217,6 +217,7 @@ export const dictionaries = {
       empty: "Nenhuma atividade ainda. Atualize likes e comments das pessoas que você acompanha.",
       liked: "curtiu",
       commentedOn: "comentou em",
+      likedAndCommented: "comentou e curtiu em",
       posted: "publicou",
     },
     profile: {
@@ -539,6 +540,7 @@ export const dictionaries = {
       empty: "No activity yet. Sync likes and comments from your tracked people.",
       liked: "liked",
       commentedOn: "commented on",
+      likedAndCommented: "commented on & liked",
       posted: "posted",
     },
     profile: {

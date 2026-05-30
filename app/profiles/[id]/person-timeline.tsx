@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useDict } from "@/lib/i18n/client";
+import { activityVerb } from "@/app/timeline/timeline-item";
 import type { TimelineRow, TimelineKind } from "@/app/timeline/timeline-item";
 
 const LIMIT = 400;
@@ -120,18 +121,12 @@ function Row({
     : "";
 
   const verb =
-    row.kind === "reaction"
-      ? { icon: "❤", text: tl.liked, cls: "text-[var(--color-danger)]" }
-      : row.kind === "comment"
-      ? { icon: "💬", text: tl.commentedOn, cls: "text-[var(--color-accent-2)]" }
-      : { icon: "📝", text: tl.posted, cls: "text-[var(--color-success)]" };
+    row.kind === "post"
+      ? { icon: "📝", text: tl.posted, cls: "text-[var(--color-success)]" }
+      : activityVerb(tl, !!row.didLike, !!row.didComment);
 
   const full = clean(
-    row.kind === "post"
-      ? row.postText
-      : row.kind === "comment"
-      ? row.postContent || row.commentary
-      : row.postContent
+    row.kind === "post" ? row.postText : row.postContent || row.commentary
   );
   const isLong = full.length > LIMIT;
   const visible = expanded || !isLong ? full : full.slice(0, LIMIT).trimEnd() + "…";

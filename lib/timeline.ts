@@ -41,14 +41,14 @@ export async function fetchTimeline(
   let reactionsQ = supabase
     .from("linkedin_profile_reactions")
     .select(
-      `id, action_text, reacted_at, post_url, post_content, post_author_name, post_author_url, profile_id,
+      `id, action_text, reacted_at, post_id, post_url, post_content, post_author_name, post_author_url, profile_id,
        actor:linkedin_profiles!inner(id, full_name, handle, avatar_url, profile_type)`
     );
 
   let commentsQ = supabase
     .from("linkedin_profile_comments")
     .select(
-      `id, commentary, commented_at, comment_url, parent_post_url, parent_post_content, parent_post_author_name, parent_post_author_url, profile_id,
+      `id, commentary, commented_at, comment_url, parent_post_id, parent_post_url, parent_post_content, parent_post_author_name, parent_post_author_url, profile_id,
        actor:linkedin_profiles!inner(id, full_name, handle, avatar_url, profile_type)`
     );
 
@@ -94,6 +94,7 @@ export async function fetchTimeline(
     id: string;
     action_text: string | null;
     reacted_at: string | null;
+    post_id: string | null;
     post_url: string | null;
     post_content: string | null;
     post_author_name: string | null;
@@ -105,6 +106,7 @@ export async function fetchTimeline(
     commentary: string | null;
     commented_at: string | null;
     comment_url: string | null;
+    parent_post_id: string | null;
     parent_post_url: string | null;
     parent_post_content: string | null;
     parent_post_author_name: string | null;
@@ -112,31 +114,93 @@ export async function fetchTimeline(
     actor: ActorPick | ActorPick[] | null;
   };
 
-  const reactionRows: TimelineRow[] =
-    (rawReactions as RR[] | null)?.map((r) => ({
+  // Merge a person's like + comment on the SAME post into one activity row
+  // (e.g. "commented on & liked ..."). Keyed by actor + post identity.
+  const postKey = (id: string | null, url: string | null): string | null => {
+    if (id) return `id:${id}`;
+    if (url) return `u:${url.split("?")[0].replace(/\/+$/, "").toLowerCase()}`;
+    return null;
+  };
+  const later = (a: string | null, b: string | null): string | null => {
+    if (!a) return b;
+    if (!b) return a;
+    return new Date(a).getTime() >= new Date(b).getTime() ? a : b;
+  };
+
+  const acc = new Map<string, TimelineRow>();
+  const loose: TimelineRow[] = [];
+
+  for (const r of (rawReactions as RR[] | null) ?? []) {
+    const actor = pickActor(r.actor);
+    const base: TimelineRow = {
       key: `r:${r.id}`,
       kind: "reaction",
       occurredAt: r.reacted_at,
-      actor: pickActor(r.actor),
+      actor,
+      didLike: true,
       actionText: r.action_text,
       postUrl: r.post_url,
       postContent: r.post_content,
       postAuthorName: r.post_author_name,
       postAuthorUrl: r.post_author_url,
-    })) ?? [];
+    };
+    const pk = postKey(r.post_id, r.post_url);
+    if (!pk || !actor) {
+      loose.push(base);
+      continue;
+    }
+    const k = `${actor.id}|${pk}`;
+    const ex = acc.get(k);
+    if (ex) {
+      ex.didLike = true;
+      ex.occurredAt = later(ex.occurredAt, r.reacted_at);
+      ex.postUrl = ex.postUrl ?? r.post_url;
+      ex.postContent = ex.postContent ?? r.post_content;
+      ex.postAuthorName = ex.postAuthorName ?? r.post_author_name;
+      ex.postAuthorUrl = ex.postAuthorUrl ?? r.post_author_url;
+    } else {
+      acc.set(k, { ...base, key: `a:${k}` });
+    }
+  }
 
-  const commentRows: TimelineRow[] =
-    (rawComments as RC[] | null)?.map((c) => ({
+  for (const c of (rawComments as RC[] | null) ?? []) {
+    const actor = pickActor(c.actor);
+    const base: TimelineRow = {
       key: `c:${c.id}`,
       kind: "comment",
       occurredAt: c.commented_at,
-      actor: pickActor(c.actor),
+      actor,
+      didComment: true,
       commentary: c.commentary,
       postUrl: c.parent_post_url ?? c.comment_url,
       postContent: c.parent_post_content,
       postAuthorName: c.parent_post_author_name,
       postAuthorUrl: c.parent_post_author_url,
-    })) ?? [];
+    };
+    const pk = postKey(c.parent_post_id, c.parent_post_url);
+    if (!pk || !actor) {
+      loose.push(base);
+      continue;
+    }
+    const k = `${actor.id}|${pk}`;
+    const ex = acc.get(k);
+    if (ex) {
+      ex.didComment = true;
+      ex.kind = "comment"; // comment carries the text, make it primary
+      ex.occurredAt = later(ex.occurredAt, c.commented_at);
+      ex.commentary = ex.commentary
+        ? `${ex.commentary}\n${c.commentary ?? ""}`.trim()
+        : c.commentary;
+      ex.postUrl = ex.postUrl ?? c.parent_post_url ?? c.comment_url;
+      ex.postContent = ex.postContent ?? c.parent_post_content;
+      ex.postAuthorName = ex.postAuthorName ?? c.parent_post_author_name;
+      ex.postAuthorUrl = ex.postAuthorUrl ?? c.parent_post_author_url;
+    } else {
+      acc.set(k, { ...base, key: `a:${k}` });
+    }
+  }
+
+  const activityRows: TimelineRow[] = [...acc.values(), ...loose];
 
   type RP = {
     id: string;
@@ -162,7 +226,7 @@ export async function fetchTimeline(
       postUrl: p.post_url,
     })) ?? [];
 
-  const merged = [...reactionRows, ...commentRows, ...postRows].sort((a, b) => {
+  const merged = [...activityRows, ...postRows].sort((a, b) => {
     const av = a.occurredAt ? new Date(a.occurredAt).getTime() : 0;
     const bv = b.occurredAt ? new Date(b.occurredAt).getTime() : 0;
     return bv - av;
